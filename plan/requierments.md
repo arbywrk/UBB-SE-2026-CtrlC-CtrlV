@@ -11,7 +11,7 @@
 2. Sorting
 
 * 2.1 The system shall allow the user to sort events by price.
-* 2.2 The system shall allow the user to sort events by past rating.
+* 2.2 The system shall allow the user to sort events by past rating. (CU# Team)
 * 2.3 The system shall apply the selected sorting option to the currently displayed list.
 * 2.4 The system shall allow only one sorting option to be active at a time.
 
@@ -20,7 +20,7 @@
 * 3.1 The system shall allow the user to filter events by price range.
 * 3.2 The system shall allow the user to filter events by type.
 * 3.3 The system shall allow the user to filter events by location.
-* 3.4 The system shall allow the user to filter events by minimum past rating.
+* 3.4 The system shall allow the user to filter events by minimum past rating. (CU# Team)
 * 3.5 The system shall combine all active filters when displaying results.
 * 3.6 The system shall allow the user to clear all active filters.
 
@@ -37,7 +37,7 @@
 * 5.3 The event details page shall display title, description, past rating, location, date, price, and poster.
 * 5.4 The system shall allow the user to mark an event as “Will attend” if the event is free.
 * 5.5 The system shall allow the user to purchase a ticket if the event is paid.
-* 5.6 The purchasing action shall redirect the user to the Buy/Sell view (TODO: add buy/sell's team name here as per the assignment).
+* 5.6 The purchasing action shall redirect the user to the Buy/Sell view (VibeCoders Team).
 * 5.7 The system shall record the user’s participation after a successful join or purchase.
 * 5.8 The system shall prevent the same user from joining the same event more than once.
 
