@@ -598,7 +598,7 @@
 											"top": 220,
 											"width": 287,
 											"height": 13,
-											"text": "-date: string",
+											"text": "-date: DateTime",
 											"horizontalAlignment": 0
 										},
 										{
@@ -670,7 +670,7 @@
 											"top": 280,
 											"width": 287,
 											"height": 13,
-											"text": "-created_by: string",
+											"text": "-created_by: int",
 											"horizontalAlignment": 0
 										},
 										{
@@ -7533,7 +7533,7 @@
 							},
 							"name": "date",
 							"visibility": "private",
-							"type": "string"
+							"type": "DateTime"
 						},
 						{
 							"_type": "UMLAttribute",
@@ -7573,7 +7573,7 @@
 							},
 							"name": "created_by",
 							"visibility": "private",
-							"type": "string",
+							"type": "int",
 							"aggregation": "shared"
 						},
 						{
@@ -9577,8 +9577,7 @@
 									"_parent": {
 										"$ref": "AAAAAAGc3HS+gTJN+xk="
 									},
-									"name": "Section",
-									"type": ""
+									"name": "Section"
 								},
 								{
 									"_type": "UMLParameter",
