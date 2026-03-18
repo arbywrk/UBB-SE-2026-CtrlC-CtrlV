@@ -6,9 +6,9 @@ namespace MovieApp.Views;
 
 public sealed partial class MainWindow : Window
 {
-    public MainWindow()
+    public MainWindow(MainViewModel viewModel)
     {
-        ViewModel = new MainViewModel(new GreetingService());
+        ViewModel = viewModel;
         InitializeComponent();
         Title = ViewModel.AppTitle;
     }
