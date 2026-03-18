@@ -1,22 +1,30 @@
-using MovieApp.Services;
+using MovieApp.Models;
 
 namespace MovieApp.ViewModels;
 
 public sealed class MainViewModel : ViewModelBase
 {
     public MainViewModel()
-        : this(new GreetingService())
+        : this(new User
+        {
+            Id = 0,
+            AuthProvider = "dummy",
+            AuthSubject = "default-user",
+            Username = "Dummy User",
+        })
     {
     }
 
-    public MainViewModel(IGreetingService greetingService)
+    public MainViewModel(User currentUser)
     {
-        Greeting = greetingService.GetGreeting();
+        CurrentUser = currentUser;
     }
 
     public string AppTitle => "MovieApp";
 
-    public string Greeting { get; }
+    public User CurrentUser { get; }
 
-    public string Description => "Shall the development begin";
+    public string Greeting => $"{CurrentUser.Username} is ready to start";
+
+    public string Description => $"Authenticated as {CurrentUser.StableId}";
 }
