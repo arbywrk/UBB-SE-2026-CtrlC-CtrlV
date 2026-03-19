@@ -1,0 +1,70 @@
+using Microsoft.UI.Xaml;
+using Microsoft.Extensions.Configuration;
+using MovieApp.Infrastructure;
+using MovieApp.Ui.Services;
+using MovieApp.Ui.ViewModels;
+using MovieApp.Ui.Views;
+
+namespace MovieApp.Ui;
+
+public partial class App : Application
+{
+    private Window? _window;
+    private ICurrentUserService? _currentUserService;
+
+    public App()
+    {
+        InitializeComponent();
+    }
+
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
+    {
+        MainViewModel viewModel;
+
+        try
+        {
+            var configuration = BuildConfiguration();
+            var databaseOptions = new DatabaseOptions
+            {
+                ConnectionString = configuration["Database:ConnectionString"]
+                    ?? throw new InvalidOperationException("Missing configuration value 'Database:ConnectionString'."),
+            };
+            var bootstrapUserOptions = new BootstrapUserOptions
+            {
+                AuthProvider = configuration["Authentication:DummyUser:AuthProvider"]
+                    ?? throw new InvalidOperationException("Missing configuration value 'Authentication:DummyUser:AuthProvider'."),
+                AuthSubject = configuration["Authentication:DummyUser:AuthSubject"]
+                    ?? throw new InvalidOperationException("Missing configuration value 'Authentication:DummyUser:AuthSubject'."),
+            };
+
+            var userRepository = new SqlUserRepository(databaseOptions);
+            _currentUserService = new CurrentUserService(userRepository, bootstrapUserOptions);
+            await _currentUserService.InitializeAsync();
+
+            viewModel = new MainViewModel(_currentUserService.CurrentUser);
+        }
+        catch (Exception exception)
+        {
+            viewModel = MainViewModel.CreateStartupError(BuildStartupErrorMessage(exception));
+        }
+
+        _window = new MainWindow(viewModel);
+        _window.Activate();
+    }
+
+    private static IConfigurationRoot BuildConfiguration()
+    {
+        return new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+            .Build();
+    }
+
+    private static string BuildStartupErrorMessage(Exception exception)
+    {
+        return "Check the database setup scripts and the appsettings.json connection string."
+            + Environment.NewLine
+            + Environment.NewLine
+            + exception.Message;
+    }
+}
