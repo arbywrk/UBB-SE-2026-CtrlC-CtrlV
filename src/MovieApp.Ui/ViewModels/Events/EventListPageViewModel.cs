@@ -10,7 +10,7 @@ namespace MovieApp.Ui.ViewModels.Events;
 /// <remarks>
 /// <see cref="AllEvents"/> stores the source data for the screen.
 /// <br/>
-/// <see cref="VisibleEvents"/> stores the transformed list shown in the Ui.
+/// <see cref="VisibleEvents"/> stores the transformed list shown in the UI.
 /// <br/>
 /// Call <see cref="RefreshVisibleEvents"/> after changing <see cref="EventListState"/>
 /// or replacing <see cref="AllEvents"/>.
@@ -36,7 +36,7 @@ public abstract class EventListPageViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// The transformed event list currently displayed by the Ui.
+    /// The transformed event list currently displayed by the UI.
     /// </summary>
     public IReadOnlyList<Event> VisibleEvents
     {
@@ -50,10 +50,24 @@ public abstract class EventListPageViewModel : ViewModelBase
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Updates <see cref="EventListState.SearchText"/> and refreshes
+    /// <see cref="VisibleEvents"/> when the effective search text changes.
+    /// </summary>
+    /// <param name="searchText">
+    /// The new search text. A <see langword="null"/> value is treated as an empty string.
+    /// </param>
     public void SetSearchText(string? searchText)
     {
-        // TODO: 2 Copy the incoming value into ListState.SearchText and refresh VisibleEvents.
-        throw new NotImplementedException();
+        // Passing in a null value must allow the user to reset search.
+        var normalizedSearchText = searchText ?? string.Empty;
+        if (EventListState.SearchText == normalizedSearchText)
+        {
+            // Refresh not needed if the search text didn't change
+            return;
+        }
+        EventListState.SearchText = normalizedSearchText;
+        RefreshVisibleEvents();
     }
 
     public void SetSortOption(EventSortOption sortOption)
@@ -79,7 +93,7 @@ public abstract class EventListPageViewModel : ViewModelBase
     /// and sort state to <see cref="AllEvents"/>
     /// </summary>
     /// <remarks>
-    /// This method must be called after any change to <see cref="ListState"/>
+    /// This method must be called after any change to <see cref="EventListState"/>
     /// so that <see cref="VisibleEvents"/> raises a property change notification
     /// and the UI can refresh.
     /// </remarks>
@@ -92,7 +106,7 @@ public abstract class EventListPageViewModel : ViewModelBase
 
     protected virtual IReadOnlyList<Event> BuildSampleEvents()
     {
-        // TODO: Return sample events for this screen while the real data source is not wired up yet.
+        // TODO: 8 Return sample events for this screen while the real data source is not wired up yet.
         throw new NotImplementedException();
     }
 }
