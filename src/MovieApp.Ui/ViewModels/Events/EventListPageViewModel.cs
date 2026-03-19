@@ -3,28 +3,41 @@ using MovieApp.Core.Models;
 
 namespace MovieApp.Ui.ViewModels.Events;
 
+/// <summary>
+/// Base view model for screens that display a searchable, filterable,
+/// and sortable event list.
+/// </summary>
+/// <remarks>
+/// <see cref="AllEvents"/> stores the source data for the screen.
+/// <br/>
+/// <see cref="VisibleEvents"/> stores the transformed list shown in the Ui.
+/// <br/>
+/// Call <see cref="RefreshVisibleEvents"/> after changing <see cref="EventListState"/>
+/// or replacing <see cref="AllEvents"/>.
+/// </remarks>
 public abstract class EventListPageViewModel : ViewModelBase
 {
     private IReadOnlyList<Event> _allEvents = [];
     private IReadOnlyList<Event> _visibleEvents = [];
 
-    protected EventListPageViewModel()
-    {
-        ListState = new EventListState();
-    }
-
     public abstract string PageTitle { get; }
 
-    public EventListState ListState { get; }
+    public EventListState EventListState { get; } = new();
 
-    public IReadOnlyList<EventSortOption> AvailableSortOptions => ListState.AvailableSortOptions;
+    public IReadOnlyList<EventSortOption> AvailableSortOptions => EventListState.AvailableSortOptions;
 
+    /// <summary>
+    /// The full source event list owned by this screen.
+    /// </summary>
     public IReadOnlyList<Event> AllEvents
     {
         get => _allEvents;
         protected set => SetProperty(ref _allEvents, value);
     }
 
+    /// <summary>
+    /// The transformed event list currently displayed by the Ui.
+    /// </summary>
     public IReadOnlyList<Event> VisibleEvents
     {
         get => _visibleEvents;
@@ -72,7 +85,7 @@ public abstract class EventListPageViewModel : ViewModelBase
     /// </remarks>
     public void RefreshVisibleEvents()
     {
-        VisibleEvents = EventListTransformer.Apply(AllEvents, ListState);
+        VisibleEvents = EventListTransformer.Apply(AllEvents, EventListState);
     }
 
     protected abstract Task<IReadOnlyList<Event>> LoadEventsAsync();
