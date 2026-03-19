@@ -20,13 +20,18 @@ public sealed class EventListState
 
     public EventListState Clone()
     {
-        // TODO: Return a deep-enough copy so view state can stay isolated per screen.
-        throw new NotImplementedException();
+        return new EventListState()
+        {
+            SearchText = SearchText,
+            SelectedSortOption = SelectedSortOption,
+            ActiveFilters = ActiveFilters.Clone(),
+        };
     }
 
     public void Reset()
     {
-        // TODO: Reset search text, selected sort option, and active filters to defaults.
-        throw new NotImplementedException();
+        SearchText = string.Empty;
+        SelectedSortOption = EventSortOption.DateAscending;
+        ActiveFilters.Reset();
     }
 }

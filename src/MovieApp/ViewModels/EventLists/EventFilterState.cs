@@ -32,4 +32,13 @@ public sealed class EventFilterState
             OnlyAvailableEvents = OnlyAvailableEvents
         };
     }
+
+    public void Reset()
+    {
+        EventType = null;
+        LocationReference = null;
+        MinimumTicketPrice = null;
+        MaximumTicketPrice = null;
+        OnlyAvailableEvents = false;
+    }
 }
