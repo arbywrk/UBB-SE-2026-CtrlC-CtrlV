@@ -1,4 +1,4 @@
-namespace MovieApp.ViewModels.EventLists;
+namespace MovieApp.Core.EventLists;
 
 public sealed class EventListState
 {
@@ -14,13 +14,12 @@ public sealed class EventListState
         EventSortOption.DateDescending,
         EventSortOption.PriceAscending,
         EventSortOption.PriceDescending,
-        EventSortOption.RatingDescending,
-        EventSortOption.TitleAscending,
+        EventSortOption.HistoricalRatingDescending,
     ];
 
     public EventListState Clone()
     {
-        return new EventListState()
+        return new EventListState
         {
             SearchText = SearchText,
             SelectedSortOption = SelectedSortOption,

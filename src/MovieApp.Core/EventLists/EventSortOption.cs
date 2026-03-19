@@ -1,4 +1,4 @@
-namespace MovieApp.ViewModels.EventLists;
+namespace MovieApp.Core.EventLists;
 
 public enum EventSortOption
 {
@@ -6,6 +6,5 @@ public enum EventSortOption
     DateDescending,
     PriceAscending,
     PriceDescending,
-    RatingDescending,
-    TitleAscending,
+    HistoricalRatingDescending,
 }

@@ -1,4 +1,4 @@
-namespace MovieApp.ViewModels.EventLists;
+namespace MovieApp.Core.EventLists;
 
 public sealed class EventFilterState
 {
@@ -14,11 +14,11 @@ public sealed class EventFilterState
 
     public bool HasActiveFilters()
     {
-        return !string.IsNullOrWhiteSpace(EventType) ||
-               !string.IsNullOrWhiteSpace(LocationReference) ||
-               MinimumTicketPrice != null || 
-               MaximumTicketPrice != null ||
-               OnlyAvailableEvents;
+        return !string.IsNullOrWhiteSpace(EventType)
+            || !string.IsNullOrWhiteSpace(LocationReference)
+            || MinimumTicketPrice is not null
+            || MaximumTicketPrice is not null
+            || OnlyAvailableEvents;
     }
 
     public EventFilterState Clone()
@@ -29,7 +29,7 @@ public sealed class EventFilterState
             LocationReference = LocationReference,
             MinimumTicketPrice = MinimumTicketPrice,
             MaximumTicketPrice = MaximumTicketPrice,
-            OnlyAvailableEvents = OnlyAvailableEvents
+            OnlyAvailableEvents = OnlyAvailableEvents,
         };
     }
 
