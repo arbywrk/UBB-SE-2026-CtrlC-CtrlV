@@ -26,7 +26,15 @@ BEGIN
 
         CONSTRAINT PK_Events PRIMARY KEY CLUSTERED (Id),
         CONSTRAINT FK_Events_Users FOREIGN KEY (CreatorUserId) 
-            REFERENCES dbo.Users(Id)
+            REFERENCES dbo.Users(Id),
+
+        CONSTRAINT CK_Events_TicketPrice CHECK (TicketPrice >= 0),
+
+        CONSTRAINT CK_Events_HistoricalRating CHECK (HistoricalRating >= 0 AND HistoricalRating <= 5),
+
+        CONSTRAINT CK_Events_MaxCapacity CHECK (MaxCapacity > 0),
+
+        CONSTRAINT CK_Events_CurrentEnrollment CHECK (CurrentEnrollment >= 0 AND CurrentEnrollment <= MaxCapacity)
     );
 END;
 GO
