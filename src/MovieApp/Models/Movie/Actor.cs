@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MovieApp.Models
+namespace MovieApp.Models.Movie.Movie
 {
-    public class Genre
+    public class Actor
     {
         public int Id { get; set; }
 
