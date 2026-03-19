@@ -18,7 +18,7 @@ public sealed partial class MyEventsPage : Page
 
     private Task InitializeViewModelAsync()
     {
-        // TODO: Call ViewModel.InitializeAsync() and decide how this page should handle loading and errors.
+        // TODO: 9 Call ViewModel.InitializeAsync() and decide how this page should handle loading and errors.
         throw new NotImplementedException();
     }
 }

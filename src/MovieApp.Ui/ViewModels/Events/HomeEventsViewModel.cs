@@ -8,13 +8,13 @@ public sealed class HomeEventsViewModel : EventListPageViewModel
 
     protected override Task<IReadOnlyList<Event>> LoadEventsAsync()
     {
-        // TODO: Load the home screen event feed or temporarily fall back to BuildSampleEvents().
+        // TODO: 7 Load the home screen event feed or temporarily fall back to BuildSampleEvents().
         throw new NotImplementedException();
     }
 
     protected override IReadOnlyList<Event> BuildSampleEvents()
     {
-        // TODO: Seed representative home-page events for manual UI verification.
+        // TODO: 8 Seed representative home-page events for manual UI verification.
         throw new NotImplementedException();
     }
 }

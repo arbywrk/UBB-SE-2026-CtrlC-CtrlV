@@ -33,38 +33,46 @@ public abstract class EventListPageViewModel : ViewModelBase
 
     public Task InitializeAsync()
     {
-        // TODO: Load this screen's events, assign AllEvents, and call RefreshVisibleEvents.
+        // TODO: 6 Load this screen's events, assign AllEvents, and call RefreshVisibleEvents.
         throw new NotImplementedException();
     }
 
     public void SetSearchText(string? searchText)
     {
-        // TODO: Copy the incoming value into ListState.SearchText and refresh VisibleEvents.
+        // TODO: 2 Copy the incoming value into ListState.SearchText and refresh VisibleEvents.
         throw new NotImplementedException();
     }
 
     public void SetSortOption(EventSortOption sortOption)
     {
-        // TODO: Update ListState.SelectedSortOption and refresh VisibleEvents.
+        // TODO: 3 Update ListState.SelectedSortOption and refresh VisibleEvents.
         throw new NotImplementedException();
     }
 
     public void UpdateFilters(Action<EventFilterState> updateFilters)
     {
-        // TODO: Apply the provided filter mutation to ListState.ActiveFilters and refresh VisibleEvents.
+        // TODO: 4 Apply the provided filter mutation to ListState.ActiveFilters and refresh VisibleEvents.
         throw new NotImplementedException();
     }
 
     public void ResetListState()
     {
-        // TODO: Reset the per-screen state and refresh VisibleEvents.
+        // TODO: 5 Reset the per-screen state and refresh VisibleEvents.
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Rebuild the visible event list by applying the current search, filter,
+    /// and sort state to <see cref="AllEvents"/>
+    /// </summary>
+    /// <remarks>
+    /// This method must be called after any change to <see cref="ListState"/>
+    /// so that <see cref="VisibleEvents"/> raises a property change notification
+    /// and the UI can refresh.
+    /// </remarks>
     public void RefreshVisibleEvents()
     {
-        // TODO: Rebuild VisibleEvents with EventListTransformer.Apply(AllEvents, ListState).
-        throw new NotImplementedException();
+        VisibleEvents = EventListTransformer.Apply(AllEvents, ListState);
     }
 
     protected abstract Task<IReadOnlyList<Event>> LoadEventsAsync();

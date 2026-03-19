@@ -8,13 +8,13 @@ public sealed class MyEventsViewModel : EventListPageViewModel
 
     protected override Task<IReadOnlyList<Event>> LoadEventsAsync()
     {
-        // TODO: Load only the current user's events or temporarily fall back to BuildSampleEvents().
+        // TODO: 7 Load only the current user's events or temporarily fall back to BuildSampleEvents().
         throw new NotImplementedException();
     }
 
     protected override IReadOnlyList<Event> BuildSampleEvents()
     {
-        // TODO: Seed representative user-owned or user-joined events for this screen.
+        // TODO: 8 Seed representative user-owned or user-joined events for this screen.
         throw new NotImplementedException();
     }
 }
