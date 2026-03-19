@@ -44,10 +44,21 @@ public abstract class EventListPageViewModel : ViewModelBase
         protected set => SetProperty(ref _visibleEvents, value);
     }
 
-    public Task InitializeAsync()
+    /// <summary>
+    /// Asynchronously initializes the event list for this screen.
+    /// </summary>
+    /// <remarks>
+    /// This method retries the screen's source events through
+    /// <see cref="LoadEventsAsync"/>, assigns <see cref="AllEvents"/>,
+    /// and rebuilds <see cref="VisibleEvents"/> using the current
+    /// <see cref="EventListState"/>.
+    /// <br/>
+    /// Call this method before the page expects the event list to be displayed.
+    /// </remarks>
+    public async Task InitializeAsync()
     {
-        // TODO: 6 Load this screen's events, assign AllEvents, and call RefreshVisibleEvents.
-        throw new NotImplementedException();
+        AllEvents = await LoadEventsAsync();
+        RefreshVisibleEvents();
     }
 
     /// <summary>
@@ -146,5 +157,15 @@ public abstract class EventListPageViewModel : ViewModelBase
         VisibleEvents = EventListTransformer.Apply(AllEvents, EventListState);
     }
 
+    /// <summary>
+    /// Asynchronously loads the raw event list for this screen.
+    /// </summary>
+    /// <returns>
+    /// A task that produces the source events used to populate <see cref="AllEvents"/>.
+    /// </returns>
+    /// <remarks>
+    /// Thi method is responsible only for retrieving the source data for the screen.
+    /// It should not update <see cref="VisibleEvents"/> directly.
+    /// </remarks>
     protected abstract Task<IReadOnlyList<Event>> LoadEventsAsync();
 }
