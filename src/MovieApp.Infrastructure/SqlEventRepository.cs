@@ -44,9 +44,9 @@ public sealed class SqlEventRepository : IEventRepository
     {
         const string sql = """
             INSERT INTO dbo.Events (Title, Description, PosterUrl, EventDateTime, LocationReference, 
-                                   TicketPrice, HistoricalRating, EventType, MaxCapacity, CurrentEnrollment, CreatorUserId)
+                                   TicketPrice, HistoricalRating, MaxCapacity, CurrentEnrollment, CreatorUserId)
             VALUES (@title, @description, @posterUrl, @eventDateTime, @locationReference, 
-                    @ticketPrice, @historicalRating, @eventType, @maxCapacity, @currentEnrollment, @creatorUserId);
+                    @ticketPrice, @historicalRating, @maxCapacity, @currentEnrollment, @creatorUserId);
             SELECT CAST(SCOPE_IDENTITY() as int);
             """;
 
@@ -61,7 +61,6 @@ public sealed class SqlEventRepository : IEventRepository
         command.Parameters.AddWithValue("@locationReference", @event.LocationReference);
         command.Parameters.AddWithValue("@ticketPrice", @event.TicketPrice);
         command.Parameters.AddWithValue("@historicalRating", @event.HistoricalRating);
-        command.Parameters.AddWithValue("@eventType", @event.EventType);
         command.Parameters.AddWithValue("@maxCapacity", @event.MaxCapacity);
         command.Parameters.AddWithValue("@currentEnrollment", @event.CurrentEnrollment);
         command.Parameters.AddWithValue("@creatorUserId", @event.CreatorUserId);
@@ -73,7 +72,7 @@ public sealed class SqlEventRepository : IEventRepository
     {
         const string sql = """
             SELECT Id, Title, Description, PosterUrl, EventDateTime, LocationReference, 
-                   TicketPrice, HistoricalRating, EventType, MaxCapacity, CurrentEnrollment, CreatorUserId
+                   TicketPrice, HistoricalRating, MaxCapacity, CurrentEnrollment, CreatorUserId
             FROM dbo.Events
             WHERE Id = @id;
             """;
@@ -123,10 +122,9 @@ public sealed class SqlEventRepository : IEventRepository
             LocationReference = reader.GetString(5),
             TicketPrice = reader.GetDecimal(6),
             HistoricalRating = reader.GetDouble(7),
-            EventType = reader.GetString(8),
-            MaxCapacity = reader.GetInt32(9),
-            CurrentEnrollment = reader.GetInt32(10),
-            CreatorUserId = reader.GetInt32(11)
+            MaxCapacity = reader.GetInt32(8),
+            CurrentEnrollment = reader.GetInt32(9),
+            CreatorUserId = reader.GetInt32(10)
         };
     }
 }
