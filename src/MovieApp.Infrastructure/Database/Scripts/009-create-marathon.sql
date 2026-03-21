@@ -47,9 +47,11 @@ BEGIN
         UserId INT NOT NULL,
         MarathonId INT NOT NULL,
         
+        JoinedAt DATETIME2 NOT NULL CONSTRAINT DF_Progress_Joined DEFAULT GETDATE(),
+
         TriviaAccuracy FLOAT NOT NULL CONSTRAINT DF_Progress_Accuracy DEFAULT 0.0,
         CompletedMoviesCount INT NOT NULL CONSTRAINT DF_Progress_Count DEFAULT 0,
-        IsCompleted BIT NOT NULL CONSTRAINT DF_Progress_IsDone DEFAULT 0,
+        
         FinishedAt DATETIME2 NULL, 
 
         CONSTRAINT PK_MarathonProgress PRIMARY KEY (UserId, MarathonId),
