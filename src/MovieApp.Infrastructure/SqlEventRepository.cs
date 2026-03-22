@@ -16,18 +16,12 @@ public sealed class SqlEventRepository : IEventRepository
 
     public async Task<IEnumerable<Event>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        const string sql = """
-            SELECT Id, Title, Description, PosterUrl, EventDateTime, LocationReference, 
-                   TicketPrice, HistoricalRating, EventType, MaxCapacity, CurrentEnrollment, CreatorUserId
-            FROM dbo.Events;
-            """;
-
         var events = new List<Event>();
 
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand(sql, connection);
+        await using var command = new SqlCommand(EventSqlQueries.SelectAll, connection);
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
@@ -40,19 +34,12 @@ public sealed class SqlEventRepository : IEventRepository
 
     public async Task<IEnumerable<Event>> GetAllByTypeAsync(string eventType, CancellationToken cancellationToken = default)
     {
-        const string sql = """
-            SELECT Id, Title, Description, PosterUrl, EventDateTime, LocationReference, 
-                   TicketPrice, HistoricalRating, EventType, MaxCapacity, CurrentEnrollment, CreatorUserId
-            FROM dbo.Events
-            WHERE EventType = @eventType;
-            """;
-
         var events = new List<Event>();
 
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand(sql, connection);
+        await using var command = new SqlCommand(EventSqlQueries.SelectByType, connection);
         command.Parameters.AddWithValue("@eventType", eventType);
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -94,17 +81,10 @@ public sealed class SqlEventRepository : IEventRepository
     }
     public async Task<Event?> FindByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        const string sql = """
-            SELECT Id, Title, Description, PosterUrl, EventDateTime, LocationReference, 
-                   TicketPrice, HistoricalRating, MaxCapacity, CurrentEnrollment, CreatorUserId
-            FROM dbo.Events
-            WHERE Id = @id;
-            """;
-
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand(sql, connection);
+        await using var command = new SqlCommand(EventSqlQueries.SelectById, connection);
         command.Parameters.AddWithValue("@id", id);
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -134,6 +114,9 @@ public sealed class SqlEventRepository : IEventRepository
         var rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
         return rowsAffected > 0;
     }
+    /// <summary>
+    /// Maps an event row using the column order defined in <see cref="EventSqlQueries.Projection"/>.
+    /// </summary>
     private static Event MapEvent(SqlDataReader reader)
     {
         return new Event
