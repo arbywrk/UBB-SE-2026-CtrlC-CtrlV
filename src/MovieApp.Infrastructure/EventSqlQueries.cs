@@ -29,4 +29,16 @@ public static class EventSqlQueries
         FROM dbo.Events
         WHERE Id = @id;
         """;
+
+    /// <summary>
+    /// Insert statement used when persisting new events. Keep the column list aligned
+    /// with the parameters assigned in <see cref="SqlEventRepository.AddAsync"/>.
+    /// </summary>
+    public const string Insert = """
+        INSERT INTO dbo.Events (Title, Description, PosterUrl, EventDateTime, LocationReference,
+                               TicketPrice, EventType, HistoricalRating, MaxCapacity, CurrentEnrollment, CreatorUserId)
+        VALUES (@title, @description, @posterUrl, @eventDateTime, @locationReference,
+                @ticketPrice, @eventType, @historicalRating, @maxCapacity, @currentEnrollment, @creatorUserId);
+        SELECT CAST(SCOPE_IDENTITY() as int);
+        """;
 }

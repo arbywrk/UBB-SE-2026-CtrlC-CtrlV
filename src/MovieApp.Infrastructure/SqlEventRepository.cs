@@ -1,18 +1,12 @@
 using Microsoft.Data.SqlClient;
 using MovieApp.Core.Models;
 using MovieApp.Core.Repositories;
-using System.Data;
 
 namespace MovieApp.Infrastructure;
 
-public sealed class SqlEventRepository : IEventRepository
+public sealed class SqlEventRepository(DatabaseOptions databaseOptions) : IEventRepository
 {
-    private readonly string _connectionString;
-
-    public SqlEventRepository(DatabaseOptions databaseOptions)
-    {
-        _connectionString = databaseOptions.ConnectionString;
-    }
+    private readonly string _connectionString = databaseOptions.ConnectionString;
 
     public async Task<IEnumerable<Event>> GetAllAsync(CancellationToken cancellationToken = default)
     {
@@ -53,24 +47,17 @@ public sealed class SqlEventRepository : IEventRepository
 
     public async Task<int> AddAsync(Event @event, CancellationToken cancellationToken = default)
     {
-        const string sql = """
-            INSERT INTO dbo.Events (Title, Description, PosterUrl, EventDateTime, LocationReference, 
-                                   TicketPrice, HistoricalRating, MaxCapacity, CurrentEnrollment, CreatorUserId)
-            VALUES (@title, @description, @posterUrl, @eventDateTime, @locationReference, 
-                    @ticketPrice, @historicalRating, @maxCapacity, @currentEnrollment, @creatorUserId);
-            SELECT CAST(SCOPE_IDENTITY() as int);
-            """;
-
         await using var connection = new SqlConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
 
-        await using var command = new SqlCommand(sql, connection);
+        await using var command = new SqlCommand(EventSqlQueries.Insert, connection);
         command.Parameters.AddWithValue("@title", @event.Title);
         command.Parameters.AddWithValue("@description", (object?)@event.Description ?? DBNull.Value);
         command.Parameters.AddWithValue("@posterUrl", @event.PosterUrl);
         command.Parameters.AddWithValue("@eventDateTime", @event.EventDateTime);
         command.Parameters.AddWithValue("@locationReference", @event.LocationReference);
         command.Parameters.AddWithValue("@ticketPrice", @event.TicketPrice);
+        command.Parameters.AddWithValue("@eventType", @event.EventType);
         command.Parameters.AddWithValue("@historicalRating", @event.HistoricalRating);
         command.Parameters.AddWithValue("@maxCapacity", @event.MaxCapacity);
         command.Parameters.AddWithValue("@currentEnrollment", @event.CurrentEnrollment);
