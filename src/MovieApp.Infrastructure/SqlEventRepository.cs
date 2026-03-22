@@ -64,8 +64,14 @@ public sealed class SqlEventRepository(DatabaseOptions databaseOptions) : IEvent
         command.Parameters.AddWithValue("@creatorUserId", @event.CreatorUserId);
 
         var result = await command.ExecuteScalarAsync(cancellationToken);
-        return (int)result!;
+        if (result is null or DBNull)
+        {
+            throw new InvalidOperationException("Expected the event insert to return the new identity value.");
+        }
+
+        return Convert.ToInt32(result);
     }
+
     public async Task<Event?> FindByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         await using var connection = new SqlConnection(_connectionString);
@@ -101,6 +107,7 @@ public sealed class SqlEventRepository(DatabaseOptions databaseOptions) : IEvent
         var rowsAffected = await command.ExecuteNonQueryAsync(cancellationToken);
         return rowsAffected > 0;
     }
+
     /// <summary>
     /// Maps an event row using the column order defined in <see cref="EventSqlQueries.Projection"/>.
     /// </summary>

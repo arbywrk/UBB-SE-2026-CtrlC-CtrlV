@@ -27,6 +27,17 @@ public sealed class EventSqlQueriesTests
     }
 
     [Fact]
+    public void EventInsert_ValidatesAndConvertsTheReturnedIdentityValue()
+    {
+        var repositoryFile = ReadRepoFile("src", "MovieApp.Infrastructure", "SqlEventRepository.cs");
+
+        Assert.Contains("if (result is null or DBNull)", repositoryFile);
+        Assert.Contains("Expected the event insert to return the new identity value.", repositoryFile);
+        Assert.Contains("return Convert.ToInt32(result);", repositoryFile);
+        Assert.DoesNotContain("return (int)result!;", repositoryFile);
+    }
+
+    [Fact]
     public void SqlEventRepository_UsesSharedQueryDefinitions()
     {
         var repositoryFile = ReadRepoFile("src", "MovieApp.Infrastructure", "SqlEventRepository.cs");
@@ -83,6 +94,8 @@ public sealed class EventSqlQueriesTests
         Assert.Contains("public SqlMarathonRepository(DatabaseOptions databaseOptions)", repositoryFile);
         Assert.Contains("ArgumentNullException.ThrowIfNull(databaseOptions);", repositoryFile);
         Assert.Contains("_connectionString = databaseOptions.ConnectionString;", repositoryFile);
+        Assert.Contains("await using var connection = new SqlConnection(_connectionString);", repositoryFile);
+        Assert.Contains("await using var command = new SqlCommand(", repositoryFile);
         Assert.DoesNotContain("public SqlMarathonRepository(string connectionString)", repositoryFile);
     }
 }

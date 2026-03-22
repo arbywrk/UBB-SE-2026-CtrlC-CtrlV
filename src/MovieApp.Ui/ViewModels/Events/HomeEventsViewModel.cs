@@ -6,7 +6,6 @@ namespace MovieApp.Ui.ViewModels.Events;
 
 public sealed class HomeEventsViewModel : EventListPageViewModel
 {
-    // TODO: consider removing FallbackSectionTitle
     private const string FallbackSectionTitle = "Other events";
 
     private readonly IEventRepository _eventRepository;
