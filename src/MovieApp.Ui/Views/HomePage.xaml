@@ -4,16 +4,116 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MovieApp.Core.Models"
     mc:Ignorable="d">
 
     <Grid Padding="32">
-        <StackPanel Spacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock
+            Grid.Row="0"
+            Style="{ThemeResource HeaderTextBlockStyle}"
+            Text="{x:Bind ViewModel.PageTitle, Mode=OneWay}" />
+
+        <!-- Loading indicator -->
+        <StackPanel
+            Grid.Row="1"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="12"
+            Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay}">
+            <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
             <TextBlock
-                Style="{ThemeResource HeaderTextBlockStyle}"
-                Text="Home" />
+                HorizontalAlignment="Center"
+                Text="Loading events..." />
+        </StackPanel>
+
+        <!-- Empty state -->
+        <StackPanel
+            Grid.Row="1"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="8"
+            Visibility="{x:Bind ViewModel.HasNoEvents, Mode=OneWay}">
+            <FontIcon
+                HorizontalAlignment="Center"
+                FontSize="48"
+                Glyph="&#xE7BA;" />
             <TextBlock
-                Text="Placeholder page for the Home area."
+                HorizontalAlignment="Center"
+                Style="{ThemeResource SubtitleTextBlockStyle}"
+                Text="No events available" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                Opacity="0.6"
+                Text="Check back later for upcoming events."
                 TextWrapping="WrapWholeWords" />
         </StackPanel>
+
+        <!-- Event list -->
+        <ListView
+            Grid.Row="1"
+            Margin="0,16,0,0"
+            ItemsSource="{x:Bind ViewModel.VisibleEvents, Mode=OneWay}"
+            SelectionMode="None"
+            Visibility="{x:Bind ViewModel.ShowEventList, Mode=OneWay}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:Event">
+                    <Grid Padding="12" ColumnSpacing="16" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Row 0: Title, Type & Date -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                            <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind Title}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                            <Border Background="{ThemeResource SystemControlBackgroundBaseLowBrush}" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                <TextBlock FontSize="12" Opacity="0.8" Text="{x:Bind EventType}" />
+                            </Border>
+                        </StackPanel>
+
+                        <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind TicketPrice}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Opacity="0.6" Text="{x:Bind EventDateTime}" />
+
+                        <!-- Row 1: Location & Rating -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="16" Opacity="0.7">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon FontSize="14" Glyph="&#xE707;" />
+                                <TextBlock Text="{x:Bind LocationReference}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon FontSize="14" Glyph="&#xE734;" Foreground="Orange" />
+                                <TextBlock Text="{x:Bind HistoricalRating}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Row 2: Enrollment & Availability -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="16" Opacity="0.7">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon FontSize="14" Glyph="&#xE716;" />
+                                <TextBlock Text="{x:Bind CurrentEnrollment}" />
+                                <TextBlock Text="enrolled" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon FontSize="14" Glyph="&#xE8D5;" />
+                                <TextBlock Text="{x:Bind AvailableSpots}" />
+                                <TextBlock Text="spots left" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
 </Page>
