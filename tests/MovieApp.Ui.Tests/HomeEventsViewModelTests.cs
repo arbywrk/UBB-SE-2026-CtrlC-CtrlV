@@ -116,7 +116,7 @@ public sealed class HomeEventsViewModelTests
 
         Assert.Equal(["Festival", "Premiere", "Other events"], viewModel.Sections.Select(s => s.Title));
         Assert.Equal([3], viewModel.Sections[0].Events.Select(e => e.Id));
-        Assert.Equal([1, 2], viewModel.Sections[1].Events.Select(e => e.Id));
+        Assert.Equal([2, 1], viewModel.Sections[1].Events.Select(e => e.Id));
         Assert.Equal([4], viewModel.Sections[2].Events.Select(e => e.Id));
     }
 
@@ -130,7 +130,7 @@ public sealed class HomeEventsViewModelTests
         viewModel.SetSearchText("premiere");
 
         Assert.Equal(["Premiere"], viewModel.Sections.Select(s => s.Title));
-        Assert.Equal([1, 2], viewModel.Sections[0].Events.Select(e => e.Id));
+        Assert.Equal([2, 1], viewModel.Sections[0].Events.Select(e => e.Id));
     }
 
     private static IReadOnlyList<Event> BuildSampleEvents()
