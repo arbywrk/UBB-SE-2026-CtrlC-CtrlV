@@ -12,6 +12,38 @@ namespace MovieApp.Ui.Views;
 public sealed partial class TriviaWheelPage : Page
 {
     private TriviaWheelViewModel? _viewModel;
+    private DispatcherTimer? _countdownTimer;
+    private DateTime _nextSpinTime;
+
+    private void StartCountdown()
+    {
+        
+        _nextSpinTime = DateTime.Today.AddDays(1);
+        CountdownBanner.Visibility = Visibility.Visible;
+
+        _countdownTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1)
+        };
+
+        _countdownTimer.Tick += (s, e) =>
+        {
+            var remaining = _nextSpinTime - DateTime.Now;
+            if (remaining <= TimeSpan.Zero)
+            {
+                _countdownTimer.Stop();
+                CountdownBanner.Visibility = Visibility.Collapsed;
+                SpinButton.IsEnabled = true;
+                RemainingSpinsText.Text = "1 spin available today";
+            }
+            else
+            {
+                CountdownText.Text = remaining.ToString(@"hh\:mm\:ss");
+            }
+        };
+
+        _countdownTimer.Start();
+    }
 
     private readonly string[] _categories = new[]
     {
@@ -41,9 +73,17 @@ public sealed partial class TriviaWheelPage : Page
             _viewModel = new TriviaWheelViewModel(App.TriviaRepository);
         }
 
-        RemainingSpinsText.Text = _viewModel?.RemainingSpinsText ?? "Loading...";
-        SpinButton.IsEnabled = _viewModel?.CanSpin ?? false;
+        if (_viewModel?.CanSpin == false)
+        {
+            RemainingSpinsText.Visibility = Visibility.Collapsed;
+            StartCountdown();
+        }
+        else
+        {
+            RemainingSpinsText.Text = _viewModel?.RemainingSpinsText ?? "Loading...";
+        }
 
+        SpinButton.IsEnabled = _viewModel?.CanSpin ?? false;
         DrawWheel();
     }
 

@@ -27,6 +27,25 @@
                         HorizontalAlignment="Center"
                         Style="{StaticResource SectionCaptionTextStyle}" />
 
+                    <!--  Countdown — only visible when spin is blocked  -->
+                    <Border
+                        x:Name="CountdownBanner"
+                        Visibility="Collapsed"
+                        Style="{StaticResource StrongSurfaceCardStyle}"
+                        Padding="12,8">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <TextBlock
+                                    Text="⏳ Next spin available in:"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource SectionCaptionTextStyle}" />
+                                <TextBlock
+                        x:Name="CountdownText"
+                        FontWeight="Bold"
+                        FontSize="14"
+                        VerticalAlignment="Center" />
+                            </StackPanel>
+                    </Border>
+
                     <TextBlock
                         Text="▼"
                         FontSize="24"
@@ -63,7 +82,7 @@
                         <StackPanel Spacing="4">
                             <TextBlock Text="How to win" FontWeight="SemiBold" />
                             <TextBlock
-                                Text="Answer all 20 questions correctly to earn a free movie ticket reward. One spin per day."
+                                Text="Answer all 20 questions correctly to earn a free event ticket reward. One spin per day."
                                 TextWrapping="WrapWholeWords"
                                 Style="{StaticResource SectionCaptionTextStyle}" />
                         </StackPanel>
