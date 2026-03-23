@@ -13,7 +13,9 @@ BEGIN
         BonusSpins INT NOT NULL 
             CONSTRAINT DF_UserSpins_BonusSpins DEFAULT (0),
 
-        LastSpinReset DATETIME NULL,
+        LastSlotSpinReset DATETIME NULL,
+
+        LastTriviaSpinReset DATETIME NULL,
 
         LoginStreak INT NOT NULL 
             CONSTRAINT DF_UserSpins_LoginStreak DEFAULT (0),
