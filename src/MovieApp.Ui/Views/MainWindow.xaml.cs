@@ -47,10 +47,7 @@ public sealed partial class MainWindow : Window
         return tag switch
         {
             "Home" => typeof(HomePage),
-            "DetailsCheckout" => typeof(DetailsCheckoutPage),
             "MyEvents" => typeof(MyEventsPage),
-            "EventManagement" => typeof(EventManagementPage),
-            "Favorites" => typeof(FavoritesPage),
             "Notifications" => typeof(NotificationsPage),
             "Rewards" => typeof(RewardsPage),
             "ReferralArea" => typeof(ReferralAreaPage),
@@ -59,5 +56,20 @@ public sealed partial class MainWindow : Window
             "Marathons" => typeof(MarathonsPage),
             _ => typeof(HomePage),
         };
+    }
+
+    private void AlertsButton_Click(object sender, RoutedEventArgs e)
+    {
+        NavigateTo("Notifications");
+    }
+
+    private void RewardsButton_Click(object sender, RoutedEventArgs e)
+    {
+        NavigateTo("Rewards");
+    }
+
+    private void ReferralButton_Click(object sender, RoutedEventArgs e)
+    {
+        NavigateTo("ReferralArea");
     }
 }

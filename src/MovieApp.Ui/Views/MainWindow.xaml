@@ -15,66 +15,60 @@
         </Grid.RowDefinitions>
 
         <Border
-            Margin="16,16,16,0"
+            Margin="12,12,12,0"
             Style="{StaticResource SurfaceCardStyle}">
-            <Grid ColumnSpacing="24">
+            <Grid ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Spacing="6">
-                    <TextBlock
-                        Style="{ThemeResource TitleTextBlockStyle}"
-                        Text="{x:Bind ViewModel.AppTitle, Mode=OneWay}" />
-                    <TextBlock
-                        Text="{x:Bind ViewModel.Greeting, Mode=OneWay}" />
-                    <TextBlock
-                        Style="{StaticResource SectionCaptionTextStyle}"
-                        Text="{x:Bind ViewModel.Description, Mode=OneWay}" />
-                </StackPanel>
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Style="{ThemeResource TitleTextBlockStyle}"
+                    Text="{x:Bind ViewModel.AppTitle, Mode=OneWay}" />
 
-                <Grid
+                <Button
                     Grid.Column="1"
-                    ColumnSpacing="12">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                    Width="36"
+                    Height="36"
+                    Padding="0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center">
+                    <Button.Flyout>
+                        <Flyout Placement="BottomEdgeAlignedRight">
+                            <StackPanel
+                                Width="220"
+                                Padding="12"
+                                Spacing="12">
+                                <StackPanel Spacing="2">
+                                    <TextBlock
+                                        FontWeight="SemiBold"
+                                        Text="{x:Bind ViewModel.UserLabel, Mode=OneWay}" />
+                                    <TextBlock
+                                        Style="{StaticResource SectionCaptionTextStyle}"
+                                        Text="Dummy user context" />
+                                </StackPanel>
 
-                    <Border
-                        Style="{StaticResource StrongSurfaceCardStyle}">
-                        <StackPanel Spacing="4">
-                            <TextBlock
-                                Style="{StaticResource MiniLabelTextStyle}"
-                                Text="User context" />
-                            <TextBlock
-                                FontSize="18"
-                                FontWeight="SemiBold"
-                                Text="Dummy authenticated user" />
-                            <TextBlock
-                                Style="{StaticResource SectionCaptionTextStyle}"
-                                Text="All features are surfaced in-app with no login flow." />
-                        </StackPanel>
-                    </Border>
+                                <ComboBox
+                                    IsEnabled="False"
+                                    SelectedIndex="{x:Bind ViewModel.UserDatabaseStateIndex, Mode=OneWay}">
+                                    <x:String>Found in DB</x:String>
+                                    <x:String>Not found in DB</x:String>
+                                </ComboBox>
 
-                    <Border
-                        Grid.Column="1"
-                        Style="{StaticResource StrongSurfaceCardStyle}">
-                        <StackPanel Spacing="4">
-                            <TextBlock
-                                Style="{StaticResource MiniLabelTextStyle}"
-                                Text="Layout status" />
-                            <TextBlock
-                                FontSize="18"
-                                FontWeight="SemiBold"
-                                Text="Implementation-ready shell" />
-                            <TextBlock
-                                Style="{StaticResource SectionCaptionTextStyle}"
-                                Text="Each screen exposes stable mount points for feature teams." />
-                        </StackPanel>
-                    </Border>
-                </Grid>
+                                <Button Click="AlertsButton_Click" Content="Alerts" />
+                                <Button Click="RewardsButton_Click" Content="Rewards" />
+                                <Button Click="ReferralButton_Click" Content="Referral" />
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontWeight="SemiBold"
+                        Text="{x:Bind ViewModel.UserBadgeText, Mode=OneWay}" />
+                </Button>
             </Grid>
         </Border>
 
@@ -95,33 +89,9 @@
                     Icon="Home"
                     Tag="Home" />
                 <controls:NavigationViewItem
-                    Content="Details"
-                    Icon="Preview"
-                    Tag="DetailsCheckout" />
-                <controls:NavigationViewItem
                     Content="My Events"
                     Icon="Calendar"
                     Tag="MyEvents" />
-                <controls:NavigationViewItem
-                    Content="Manage"
-                    Icon="Edit"
-                    Tag="EventManagement" />
-                <controls:NavigationViewItem
-                    Content="Favorites"
-                    Icon="Favorite"
-                    Tag="Favorites" />
-                <controls:NavigationViewItem
-                    Content="Alerts"
-                    Icon="Message"
-                    Tag="Notifications" />
-                <controls:NavigationViewItem
-                    Content="Rewards"
-                    Icon="Like"
-                    Tag="Rewards" />
-                <controls:NavigationViewItem
-                    Content="Referral"
-                    Icon="Share"
-                    Tag="ReferralArea" />
                 <controls:NavigationViewItem
                     Content="Slots"
                     Icon="Shop"
