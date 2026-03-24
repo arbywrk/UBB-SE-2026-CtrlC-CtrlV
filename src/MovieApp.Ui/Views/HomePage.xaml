@@ -8,31 +8,54 @@
     mc:Ignorable="d">
 
     <ScrollViewer Padding="24" VerticalScrollBarVisibility="Auto">
-        <StackPanel Spacing="24">
+        <StackPanel Spacing="16">
             <TextBlock
                 Style="{ThemeResource HeaderTextBlockStyle}"
                 Text="{Binding PageTitle}" />
 
-            <AutoSuggestBox
-                Width="320"
-                PlaceholderText="Search events"
-                TextChanged="SearchBox_TextChanged" />
+            <Border Style="{StaticResource SurfaceCardStyle}">
+                <StackPanel Spacing="12">
+                    <TextBlock
+                        Style="{StaticResource SectionTitleTextStyle}"
+                        Text="Shortcuts" />
+
+                    <ItemsControl ItemsSource="{Binding NavigationShortcuts}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="12" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button
+                                    Padding="16"
+                                    Background="Transparent"
+                                    Click="ShortcutButton_Click">
+                                    <StackPanel
+                                        Width="220"
+                                        Spacing="6">
+                                        <TextBlock
+                                            FontSize="16"
+                                            FontWeight="SemiBold"
+                                            Text="{Binding Title}" />
+                                        <TextBlock
+                                            Opacity="0.75"
+                                            Text="{Binding Description}"
+                                            TextWrapping="WrapWholeWords" />
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
 
             <ItemsControl ItemsSource="{Binding Sections}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Spacing="8">
-                            <Button
-                                Padding="0"
-                                HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Stretch"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                Click="SectionHeaderButton_Click">
-                                <ui:SectionHeader
-                                    Title="{Binding Title}"
-                                    ActionText="See all" />
-                            </Button>
+                            <ui:SectionHeader Title="{Binding Title}" />
 
                             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                                 <ItemsControl ItemsSource="{Binding Events}">

@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using MovieApp.Ui.Navigation;
 using MovieApp.Ui.ViewModels;
 
 namespace MovieApp.Ui.Views;
@@ -15,23 +16,15 @@ public sealed partial class MainWindow : Window
         ViewModel = viewModel;
         InitializeComponent();
 
-        AppNavigationView.SelectedItem = HomeNavigationItem;
-        NavigateTo("Home");
+        NavigateToRoute(AppRouteResolver.Home);
     }
 
     public MainViewModel ViewModel { get; }
 
-    private void AppNavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    public void NavigateToRoute(string tag)
     {
-        if (args.SelectedItemContainer?.Tag is string tag)
-        {
-            NavigateTo(tag);
-        }
-    }
-
-    private void NavigateTo(string tag)
-    {
-        var pageType = ResolvePageType(tag);
+        var pageType = AppRouteResolver.ResolvePageType(tag);
+        SyncSelectedNavigationItem(tag);
 
         if (ContentFrame.CurrentSourcePageType != pageType)
         {
@@ -39,37 +32,35 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    /// <summary>
-    /// Resolves a navigation tag to the page that owns that feature area.
-    /// </summary>
-    private static Type ResolvePageType(string tag)
+    private void AppNavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        return tag switch
+        if (args.SelectedItemContainer?.Tag is string tag)
         {
-            "Home" => typeof(HomePage),
-            "MyEvents" => typeof(MyEventsPage),
-            "Notifications" => typeof(NotificationsPage),
-            "Rewards" => typeof(RewardsPage),
-            "ReferralArea" => typeof(ReferralAreaPage),
-            "SlotMachine" => typeof(SlotMachinePage),
-            "TriviaWheel" => typeof(TriviaWheelPage),
-            "Marathons" => typeof(MarathonsPage),
-            _ => typeof(HomePage),
-        };
+            NavigateToRoute(tag);
+        }
     }
 
     private void AlertsButton_Click(object sender, RoutedEventArgs e)
     {
-        NavigateTo("Notifications");
+        NavigateToRoute(AppRouteResolver.Notifications);
     }
 
     private void RewardsButton_Click(object sender, RoutedEventArgs e)
     {
-        NavigateTo("Rewards");
+        NavigateToRoute(AppRouteResolver.Rewards);
     }
 
     private void ReferralButton_Click(object sender, RoutedEventArgs e)
     {
-        NavigateTo("ReferralArea");
+        NavigateToRoute(AppRouteResolver.ReferralArea);
+    }
+
+    private void SyncSelectedNavigationItem(string tag)
+    {
+        var selectedItem = AppNavigationView.MenuItems
+            .OfType<NavigationViewItem>()
+            .FirstOrDefault(item => string.Equals(item.Tag as string, tag, StringComparison.Ordinal));
+
+        AppNavigationView.SelectedItem = selectedItem;
     }
 }

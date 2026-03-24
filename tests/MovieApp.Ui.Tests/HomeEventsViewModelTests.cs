@@ -148,6 +148,16 @@ public sealed class HomeEventsViewModelTests
         Assert.Equal("Premiere", context.GroupingValue);
     }
 
+    [Fact]
+    public void NavigationShortcuts_ExposeHomeLinksToMyEventsAndEventManagement()
+    {
+        var repository = new StubEventRepository([]);
+        var viewModel = new HomeEventsViewModel(repository);
+
+        Assert.Equal(["My Events", "Event Management"], viewModel.NavigationShortcuts.Select(s => s.Title));
+        Assert.Equal(["MyEvents", "EventManagement"], viewModel.NavigationShortcuts.Select(s => s.RouteTag));
+    }
+
     private static IReadOnlyList<Event> BuildSampleEvents()
     {
         return
