@@ -4,63 +4,60 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="using:MovieApp.Core.Models"
     xmlns:ui="using:MovieApp.Ui.Controls"
     mc:Ignorable="d">
 
-    <ScrollViewer
-        Padding="20"
-        VerticalScrollBarVisibility="Auto">
-        <StackPanel Spacing="20">
+    <ScrollViewer Padding="24" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="16">
+            <TextBlock
+                Style="{ThemeResource HeaderTextBlockStyle}"
+                Text="{Binding PageTitle}" />
+
             <Border Style="{StaticResource SurfaceCardStyle}">
-                <Grid ColumnSpacing="12" RowSpacing="12">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                <StackPanel Spacing="12">
+                    <TextBlock
+                        Style="{StaticResource SectionTitleTextStyle}"
+                        Text="Shortcuts" />
 
-                    <AutoSuggestBox PlaceholderText="Search" />
-                    <ComboBox
-                        Grid.Column="1"
-                        PlaceholderText="Sort">
-                        <x:String>Price</x:String>
-                        <x:String>Historical rating</x:String>
-                    </ComboBox>
-                    <ComboBox
-                        Grid.Column="2"
-                        PlaceholderText="Section" />
-                    <Button
-                        Grid.Column="3"
-                        Content="Clear" />
+                    <ItemsControl ItemsSource="{Binding NavigationShortcuts}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="12" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
 
-                    <StackPanel
-                        Grid.Row="1"
-                        Grid.ColumnSpan="4"
-                        Orientation="Horizontal"
-                        Spacing="10">
-                        <Button Content="Price" />
-                        <Button Content="Type" />
-                        <Button Content="Location" />
-                        <Button Content="Rating" />
-                    </StackPanel>
-                </Grid>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button
+                                    Padding="16"
+                                    Background="Transparent"
+                                    Click="ShortcutButton_Click">
+                                    <StackPanel
+                                        Width="220"
+                                        Spacing="6">
+                                        <TextBlock
+                                            FontSize="16"
+                                            FontWeight="SemiBold"
+                                            Text="{Binding Title}" />
+                                        <TextBlock
+                                            Opacity="0.75"
+                                            Text="{Binding Description}"
+                                            TextWrapping="WrapWholeWords" />
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
             </Border>
 
             <ItemsControl ItemsSource="{Binding Sections}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Margin="0,8,0,0" Spacing="8">
+                        <StackPanel Spacing="8">
                             <ui:SectionHeader Title="{Binding Title}" />
 
-                            <ScrollViewer
-                                HorizontalScrollBarVisibility="Auto"
-                                VerticalScrollBarVisibility="Disabled">
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                                 <ItemsControl ItemsSource="{Binding Events}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>

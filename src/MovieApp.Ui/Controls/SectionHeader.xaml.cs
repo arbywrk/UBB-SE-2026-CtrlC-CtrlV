@@ -22,4 +22,17 @@ public sealed partial class SectionHeader : UserControl
             typeof(string),
             typeof(SectionHeader),
             new PropertyMetadata(string.Empty));
+
+    public string ActionText
+    {
+        get => (string)GetValue(ActionTextProperty);
+        set => SetValue(ActionTextProperty, value);
+    }
+
+    public static readonly DependencyProperty ActionTextProperty =
+        DependencyProperty.Register(
+            nameof(ActionText),
+            typeof(string),
+            typeof(SectionHeader),
+            new PropertyMetadata("See all"));
 }

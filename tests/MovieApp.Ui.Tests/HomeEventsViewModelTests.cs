@@ -133,6 +133,31 @@ public sealed class HomeEventsViewModelTests
         Assert.Equal([2, 1], viewModel.Sections[0].Events.Select(e => e.Id));
     }
 
+    [Fact]
+    public async Task CreateNavigationContext_ReturnsSelectedGroupingInformation()
+    {
+        var repository = new StubEventRepository(BuildSectionSampleEvents());
+        var viewModel = new HomeEventsViewModel(repository);
+
+        await viewModel.InitializeAsync();
+
+        var section = Assert.Single(viewModel.Sections, s => s.Title == "Premiere");
+        var context = viewModel.CreateNavigationContext(section);
+
+        Assert.Equal("Premiere", context.Title);
+        Assert.Equal("Premiere", context.GroupingValue);
+    }
+
+    [Fact]
+    public void NavigationShortcuts_ExposeHomeLinksToMyEventsAndEventManagement()
+    {
+        var repository = new StubEventRepository([]);
+        var viewModel = new HomeEventsViewModel(repository);
+
+        Assert.Equal(["My Events", "Event Management"], viewModel.NavigationShortcuts.Select(s => s.Title));
+        Assert.Equal(["MyEvents", "EventManagement"], viewModel.NavigationShortcuts.Select(s => s.RouteTag));
+    }
+
     private static IReadOnlyList<Event> BuildSampleEvents()
     {
         return

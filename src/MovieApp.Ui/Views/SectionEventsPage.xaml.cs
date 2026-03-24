@@ -1,64 +1,56 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using MovieApp.Core.Models;
 using MovieApp.Core.Repositories;
 using MovieApp.Ui.Controls;
-using MovieApp.Ui.Navigation;
 using MovieApp.Ui.Services;
 using MovieApp.Ui.ViewModels.Events;
+using System.Globalization;
 
 namespace MovieApp.Ui.Views;
 
-/// <summary>
-/// Hosts the discovery-first home experience, including horizontal event sections
-/// and launch points into the other requirement-driven feature areas.
-/// </summary>
-public sealed partial class HomePage : Page
+public sealed partial class SectionEventsPage : Page
 {
     private bool _initialized;
 
-    public HomeEventsViewModel ViewModel { get; }
+    public SectionEventsViewModel? ViewModel { get; private set; }
 
-    /// <summary>
-    /// Returns the repository used to populate the home event rows.
-    /// </summary>
     private static IEventRepository GetEventRepository()
         => App.EventRepository ?? UnavailableEventRepository.Instance;
 
-    public HomePage()
+    public SectionEventsPage()
     {
-        ViewModel = new HomeEventsViewModel(GetEventRepository());
-        NavigationCacheMode = NavigationCacheMode.Required;
         InitializeComponent();
-        DataContext = ViewModel;
-        Loaded += HomePage_Loaded;
     }
 
-    /// <summary>
-    /// Initializes the page's event data once after the visual tree is loaded.
-    /// </summary>
-    private async void HomePage_Loaded(object sender, RoutedEventArgs e)
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
-        if (_initialized) return;
+        base.OnNavigatedTo(e);
+
+        if (_initialized)
+        {
+            return;
+        }
+
+        if (e.Parameter is not SectionNavigationContext context)
+        {
+            return;
+        }
+
+        ViewModel = new SectionEventsViewModel(GetEventRepository(), context);
+        DataContext = ViewModel;
+
         _initialized = true;
         await ViewModel.InitializeAsync();
     }
 
-    private void ShortcutButton_Click(object sender, RoutedEventArgs e)
+    private void BackButton_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button button || button.DataContext is not HomeNavigationShortcut shortcut)
+        if (Frame.CanGoBack)
         {
-            return;
+            Frame.GoBack();
         }
-
-        if (App.CurrentMainWindow is not null)
-        {
-            App.CurrentMainWindow.NavigateToRoute(shortcut.RouteTag);
-            return;
-        }
-
-        Frame.Navigate(AppRouteResolver.ResolvePageType(shortcut.RouteTag));
     }
 
     private async void EventCardButton_Click(object sender, RoutedEventArgs e)
@@ -105,7 +97,7 @@ public sealed partial class HomePage : Page
 
         layout.Children.Add(new TextBlock
         {
-            Text = $"Price: {EventCard.GetPriceText(selectedEvent, System.Globalization.CultureInfo.CurrentCulture)}",
+            Text = $"Price: {EventCard.GetPriceText(selectedEvent, CultureInfo.CurrentCulture)}",
         });
 
         layout.Children.Add(new TextBlock
@@ -116,19 +108,6 @@ public sealed partial class HomePage : Page
         layout.Children.Add(new TextBlock
         {
             Text = $"Seats: {EventCard.GetCapacityText(selectedEvent)}",
-        });
-
-        layout.Children.Add(new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 8,
-            Children =
-            {
-                new Button { Content = "Will attend" },
-                new Button { Content = "Buy ticket" },
-                new Button { Content = "Favorite" },
-                new Button { Content = "Seat guide" },
-            },
         });
 
         return layout;

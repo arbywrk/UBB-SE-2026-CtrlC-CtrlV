@@ -16,6 +16,7 @@ public partial class App : Application
 
     public static IEventRepository? EventRepository { get; private set; }
     public static ITriviaRepository? TriviaRepository { get; private set; }
+    public static MainWindow? CurrentMainWindow { get; private set; }
 
     public App()
     {
@@ -61,7 +62,8 @@ public partial class App : Application
             viewModel = MainViewModel.CreateStartupError(BuildStartupErrorMessage(exception));
         }
 
-        _window = new MainWindow(viewModel);
+        CurrentMainWindow = new MainWindow(viewModel);
+        _window = CurrentMainWindow;
         _window.Activate();
     }
 

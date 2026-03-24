@@ -27,6 +27,10 @@
     <None Remove="Views\TriviaWheelPage.xaml" />
     <None Remove="Controls\EventCard.xaml" />
     <None Remove="Controls\SectionHeader.xaml" />
+	<None Remove="Views\SectionEventsPage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Remove="views\SectionEventsPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,6 +57,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Views\SectionEventsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <Page Update="Controls\EventCard.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -61,7 +71,13 @@
     </Page>
   </ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup>
+		<Page Update="Views\SectionEventsPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</Page>
+	</ItemGroup>
+
+	<ItemGroup>
     <Page Update="Views\DetailsCheckoutPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
