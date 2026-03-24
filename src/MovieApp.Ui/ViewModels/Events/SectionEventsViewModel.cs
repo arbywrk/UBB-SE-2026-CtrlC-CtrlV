@@ -3,17 +3,12 @@ using MovieApp.Core.Repositories;
 
 namespace MovieApp.Ui.ViewModels.Events;
 
-public sealed class SectionEventsViewModel : EventListPageViewModel
+public sealed class SectionEventsViewModel(IEventRepository repository, SectionNavigationContext context)
+    : EventListPageViewModel
 {
-    private readonly IEventRepository _repository;
+    private readonly IEventRepository _repository = repository ?? throw new ArgumentNullException(nameof(repository));
 
-    public SectionEventsViewModel(IEventRepository repository, SectionNavigationContext context)
-    {
-        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-        Context = context ?? throw new ArgumentNullException(nameof(context));
-    }
-
-    public SectionNavigationContext Context { get; }
+    public SectionNavigationContext Context { get; } = context ?? throw new ArgumentNullException(nameof(context));
 
     public override string PageTitle => Context.Title;
 
@@ -27,13 +22,15 @@ public sealed class SectionEventsViewModel : EventListPageViewModel
             .ToList();
     }
 
-    internal static bool MatchesSection(Event? @event, string groupingValue)
+    private static bool MatchesSection(Event? @event, string groupingValue)
     {
-        var normalizedGroupingValue = string.IsNullOrWhiteSpace(groupingValue)
-            ? HomeEventsViewModel.FallbackTitle
-            : groupingValue.Trim();
+        if (@event is null || string.IsNullOrWhiteSpace(@event.EventType) || string.IsNullOrWhiteSpace(groupingValue))
+        {
+            return false;
+        }
+        var normalizedGroupingValue = groupingValue.Trim();
 
-        var eventGroupingValue = HomeEventsViewModel.NormalizeGroupingValue(@event);
+        var eventGroupingValue = @event.EventType.Trim();
 
         return string.Equals(
             eventGroupingValue,

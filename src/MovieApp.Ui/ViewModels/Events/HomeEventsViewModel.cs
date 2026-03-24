@@ -7,7 +7,6 @@ namespace MovieApp.Ui.ViewModels.Events;
 
 public sealed class HomeEventsViewModel : EventListPageViewModel
 {
-    private const string FallbackTitle = "Other events";
     private readonly IEventRepository _repository;
     private IReadOnlyList<EventSection> _sections = [];
 
@@ -41,6 +40,17 @@ public sealed class HomeEventsViewModel : EventListPageViewModel
         private set => SetProperty(ref _sections, value);
     }
 
+    public SectionNavigationContext CreateNavigationContext(EventSection section)
+    {
+        ArgumentNullException.ThrowIfNull(section);
+
+        return new SectionNavigationContext
+        {
+            Title = section.Title,
+            GroupingValue = section.GroupingValue,
+        };
+    }
+
     protected override async Task<IReadOnlyList<Event>> LoadEventsAsync()
     {
         var allEvents = await _repository.GetAllAsync();
@@ -58,18 +68,18 @@ public sealed class HomeEventsViewModel : EventListPageViewModel
     private static IReadOnlyList<EventSection> BuildSections(IEnumerable<Event> events)
     {
         var groups = events
-            .GroupBy(
-                e => string.IsNullOrWhiteSpace(e.EventType) ? FallbackTitle : e.EventType.Trim(),
-                StringComparer.OrdinalIgnoreCase);
+            .Where(e => !string.IsNullOrWhiteSpace(e.EventType))
+            .GroupBy(e => e.EventType.Trim(), StringComparer.OrdinalIgnoreCase);
 
         var sections = groups
             .Select(g => new EventSection
             {
                 Title = g.Key,
-                Events = g.OrderBy(ev => ev.EventDateTime).ToList(),
+                Events = g.OrderBy(ev => ev.EventDateTime)
+                    .ToList(),
+                GroupingValue = g.Key,
             })
-            .OrderBy(s => s.Title.Equals(FallbackTitle, StringComparison.OrdinalIgnoreCase) ? 1 : 0)
-            .ThenBy(s => s.Title)
+            .OrderBy(s => s.Title)
             .ToList();
 
         return sections;
