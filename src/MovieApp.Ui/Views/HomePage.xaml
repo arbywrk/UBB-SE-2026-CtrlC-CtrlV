@@ -4,63 +4,37 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="using:MovieApp.Core.Models"
     xmlns:ui="using:MovieApp.Ui.Controls"
     mc:Ignorable="d">
 
-    <ScrollViewer
-        Padding="20"
-        VerticalScrollBarVisibility="Auto">
-        <StackPanel Spacing="20">
-            <Border Style="{StaticResource SurfaceCardStyle}">
-                <Grid ColumnSpacing="12" RowSpacing="12">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+    <ScrollViewer Padding="24" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="24">
+            <TextBlock
+                Style="{ThemeResource HeaderTextBlockStyle}"
+                Text="{Binding PageTitle}" />
 
-                    <AutoSuggestBox PlaceholderText="Search" />
-                    <ComboBox
-                        Grid.Column="1"
-                        PlaceholderText="Sort">
-                        <x:String>Price</x:String>
-                        <x:String>Historical rating</x:String>
-                    </ComboBox>
-                    <ComboBox
-                        Grid.Column="2"
-                        PlaceholderText="Section" />
-                    <Button
-                        Grid.Column="3"
-                        Content="Clear" />
-
-                    <StackPanel
-                        Grid.Row="1"
-                        Grid.ColumnSpan="4"
-                        Orientation="Horizontal"
-                        Spacing="10">
-                        <Button Content="Price" />
-                        <Button Content="Type" />
-                        <Button Content="Location" />
-                        <Button Content="Rating" />
-                    </StackPanel>
-                </Grid>
-            </Border>
+            <AutoSuggestBox
+                Width="320"
+                PlaceholderText="Search events"
+                TextChanged="SearchBox_TextChanged" />
 
             <ItemsControl ItemsSource="{Binding Sections}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Margin="0,8,0,0" Spacing="8">
-                            <ui:SectionHeader Title="{Binding Title}" />
+                        <StackPanel Spacing="8">
+                            <Button
+                                Padding="0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Click="SectionHeaderButton_Click">
+                                <ui:SectionHeader
+                                    Title="{Binding Title}"
+                                    ActionText="See all" />
+                            </Button>
 
-                            <ScrollViewer
-                                HorizontalScrollBarVisibility="Auto"
-                                VerticalScrollBarVisibility="Disabled">
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                                 <ItemsControl ItemsSource="{Binding Events}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>

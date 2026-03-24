@@ -1,5 +1,6 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using MovieApp.Core.Models;
 using MovieApp.Core.Repositories;
 using MovieApp.Ui.Controls;
@@ -9,41 +10,47 @@ using System.Globalization;
 
 namespace MovieApp.Ui.Views;
 
-public sealed partial class HomePage : Page
+public sealed partial class SectionEventsPage : Page
 {
-    public HomeEventsViewModel ViewModel { get; }
+    private bool _initialized;
+
+    public SectionEventsViewModel? ViewModel { get; private set; }
 
     private static IEventRepository GetEventRepository()
         => App.EventRepository ?? UnavailableEventRepository.Instance;
 
-    public HomePage()
+    public SectionEventsPage()
     {
         InitializeComponent();
-        ViewModel = new HomeEventsViewModel(GetEventRepository());
-        DataContext = ViewModel;
-        Loaded += HomePage_Loaded;
     }
 
-    private async void HomePage_Loaded(object sender, RoutedEventArgs e)
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
-        Loaded -= HomePage_Loaded;
-        await ViewModel.InitializeAsync();
-    }
+        base.OnNavigatedTo(e);
 
-    private void SearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
-    {
-        ViewModel.SetSearchText(sender.Text);
-    }
-
-    private void SectionHeaderButton_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button button || button.DataContext is not EventSection section)
+        if (_initialized)
         {
             return;
         }
 
-        var navigationContext = ViewModel.CreateNavigationContext(section);
-        Frame.Navigate(typeof(SectionEventsPage), navigationContext);
+        if (e.Parameter is not SectionNavigationContext context)
+        {
+            return;
+        }
+
+        ViewModel = new SectionEventsViewModel(GetEventRepository(), context);
+        DataContext = ViewModel;
+
+        _initialized = true;
+        await ViewModel.InitializeAsync();
+    }
+
+    private void BackButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (Frame.CanGoBack)
+        {
+            Frame.GoBack();
+        }
     }
 
     private async void EventCardButton_Click(object sender, RoutedEventArgs e)

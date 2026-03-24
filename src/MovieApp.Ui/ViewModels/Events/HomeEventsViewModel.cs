@@ -1,25 +1,23 @@
-using System.ComponentModel;
 using MovieApp.Core.Models;
 using MovieApp.Core.Repositories;
+using System.ComponentModel;
 
 namespace MovieApp.Ui.ViewModels.Events;
 
 public sealed class HomeEventsViewModel : EventListPageViewModel
 {
-    private const string FallbackSectionTitle = "Other events";
+    public const string FallbackTitle = "Other events";
 
-    private readonly IEventRepository _eventRepository;
+    private readonly IEventRepository _repository;
     private IReadOnlyList<EventSection> _sections = [];
 
-    public HomeEventsViewModel(IEventRepository eventRepository)
+    public HomeEventsViewModel(IEventRepository repository)
     {
-        ArgumentNullException.ThrowIfNull(eventRepository);
-
-        _eventRepository = eventRepository;
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         PropertyChanged += OnBasePropertyChanged;
     }
 
-    public override string PageTitle => "Home Events";
+    public override string PageTitle => "Home";
 
     public IReadOnlyList<EventSection> Sections
     {
@@ -29,53 +27,52 @@ public sealed class HomeEventsViewModel : EventListPageViewModel
 
     protected override async Task<IReadOnlyList<Event>> LoadEventsAsync()
     {
-        var events = await _eventRepository.GetAllAsync();
-        return events.ToList();
+        var allEvents = await _repository.GetAllAsync();
+        return allEvents.ToList();
+    }
+
+    public SectionNavigationContext CreateNavigationContext(EventSection section)
+    {
+        ArgumentNullException.ThrowIfNull(section);
+
+        return new SectionNavigationContext
+        {
+            Title = section.Title,
+            GroupingValue = section.GroupingValue,
+        };
+    }
+
+    internal static string NormalizeGroupingValue(Event? @event)
+    {
+        return string.IsNullOrWhiteSpace(@event?.EventType)
+            ? FallbackTitle
+            : @event.EventType.Trim();
     }
 
     private void OnBasePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(VisibleEvents))
         {
-            RebuildSections();
+            Sections = BuildSections(VisibleEvents);
         }
-    }
-
-    private void RebuildSections()
-    {
-        Sections = BuildSections(VisibleEvents);
     }
 
     private static IReadOnlyList<EventSection> BuildSections(IEnumerable<Event> events)
     {
-        // Group by EventType (trimmed), fallback if empty/whitespace.
         var groups = events
-            .GroupBy(e => NormalizeSectionTitle(e.EventType), StringComparer.OrdinalIgnoreCase);
+            .GroupBy(NormalizeGroupingValue, StringComparer.OrdinalIgnoreCase);
 
-        // Order: all non-fallback sections alphabetical; fallback at end.
         var sections = groups
             .Select(g => new EventSection
             {
                 Title = g.Key,
-                Events = g.OrderBy(x => x.EventDateTime).ToList(),
+                GroupingValue = g.Key,
+                Events = g.OrderBy(ev => ev.EventDateTime).ToList(),
             })
-            .OrderBy(s => IsFallback(s.Title) ? 1 : 0)
-            .ThenBy(s => s.Title, StringComparer.OrdinalIgnoreCase)
+            .OrderBy(s => s.Title.Equals(FallbackTitle, StringComparison.OrdinalIgnoreCase) ? 1 : 0)
+            .ThenBy(s => s.Title)
             .ToList();
 
         return sections;
     }
-
-    private static string NormalizeSectionTitle(string eventType)
-    {
-        if (string.IsNullOrWhiteSpace(eventType))
-        {
-            return FallbackSectionTitle;
-        }
-
-        return eventType.Trim();
-    }
-
-    private static bool IsFallback(string title)
-        => string.Equals(title, FallbackSectionTitle, StringComparison.OrdinalIgnoreCase);
 }
