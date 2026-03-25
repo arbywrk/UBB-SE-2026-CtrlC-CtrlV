@@ -1,5 +1,7 @@
 using Microsoft.UI.Xaml.Controls;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
+using MovieApp.Core.Models;
 
 namespace MovieApp.Ui.Views;
 
@@ -25,6 +27,8 @@ public sealed partial class ReferralAreaPage : Page, INotifyPropertyChanged
         }
     }
 
+    public ObservableCollection<ReferralHistoryItem> ReferralHistory { get; } = new();
+
     public ReferralAreaPage()
     {
         InitializeComponent();
@@ -37,6 +41,13 @@ public sealed partial class ReferralAreaPage : Page, INotifyPropertyChanged
         {
             var code = await App.AmbassadorRepository.GetReferralCodeAsync(currentUser.Id);
             ReferralCode = code ?? "No code generated";
+
+            var history = await App.AmbassadorRepository.GetReferralHistoryAsync(currentUser.Id);
+            ReferralHistory.Clear();
+            foreach (var item in history)
+            {
+                ReferralHistory.Add(item);
+            }
         }
     }
 }

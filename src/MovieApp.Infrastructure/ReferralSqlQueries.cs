@@ -82,4 +82,19 @@ public static class ReferralSqlQueries
             SELECT CAST(0 AS BIT);
         END
         """;
+
+    /// <summary>
+    /// Retrieves the referral usage history for a specific ambassador.
+    /// </summary>
+    public const string SelectReferralHistoryByAmbassadorId = """
+        SELECT 
+            u.Username AS FriendName,
+            e.Title AS EventTitle,
+            l.UsedAt
+        FROM dbo.ReferralLog l
+        INNER JOIN dbo.Users u ON l.FriendID = u.Id
+        INNER JOIN dbo.Events e ON l.EventID = e.Id
+        WHERE l.AmbassadorID = @ambassadorId
+        ORDER BY l.UsedAt DESC;
+        """;
 }
