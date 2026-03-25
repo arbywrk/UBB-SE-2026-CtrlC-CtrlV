@@ -130,6 +130,29 @@ public sealed partial class HomePage : Page
             Text = $"Seats: {EventCard.GetCapacityText(selectedEvent)}",
         });
 
+        var referralTextBox = new TextBox { PlaceholderText = "Optional referral code", Width = 200 };
+        var validationButton = new Button { Content = new FontIcon { Glyph = "\uE73E", FontSize = 14 } };
+
+        validationButton.Click += async (s, e) =>
+        {
+            if (string.IsNullOrWhiteSpace(referralTextBox.Text)) return;
+
+            if (App.ReferralValidator is not null && App.CurrentUserService?.CurrentUser is { } currentUser)
+            {
+                bool isValid = await App.ReferralValidator.IsValidReferralAsync(referralTextBox.Text, currentUser.Id);
+                referralTextBox.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                    isValid ? Microsoft.UI.Colors.Green : Microsoft.UI.Colors.Red);
+                referralTextBox.BorderThickness = new Microsoft.UI.Xaml.Thickness(2);
+            }
+        };
+
+        layout.Children.Add(new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 8,
+            Children = { referralTextBox, validationButton }
+        });
+
         layout.Children.Add(new StackPanel
         {
             Orientation = Orientation.Horizontal,
