@@ -96,11 +96,12 @@ public sealed class SqlAmbassadorRepository : IAmbassadorRepository
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
         {
-            results.Add(new MovieApp.Core.Models.ReferralHistoryItem(
-                FriendName: reader.GetString(0),
-                EventTitle: reader.GetString(1),
-                UsedAt: reader.GetDateTime(2)
-            ));
+            results.Add(new MovieApp.Core.Models.ReferralHistoryItem
+            {
+                FriendName = reader.GetString(0),
+                EventTitle = reader.GetString(1),
+                UsedAt = reader.GetDateTime(2),
+            });
         }
 
         return results;
