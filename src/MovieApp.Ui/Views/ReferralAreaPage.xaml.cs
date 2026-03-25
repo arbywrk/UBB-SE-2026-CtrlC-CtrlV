@@ -1,8 +1,10 @@
 using Microsoft.UI.Xaml.Controls;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using MovieApp.Core.Models;
 using Microsoft.UI.Xaml.Navigation;
+using Microsoft.UI.Xaml;
 
 namespace MovieApp.Ui.Views;
 
@@ -30,9 +32,12 @@ public sealed partial class ReferralAreaPage : Page, INotifyPropertyChanged
 
     public ObservableCollection<ReferralHistoryItem> ReferralHistory { get; } = new();
 
+    public Visibility IsHistoryEmpty => ReferralHistory.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
     public ReferralAreaPage()
     {
         InitializeComponent();
+        ReferralHistory.CollectionChanged += (_, _) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsHistoryEmpty)));
     }
 
     protected override async void OnNavigatedTo(NavigationEventArgs e)
