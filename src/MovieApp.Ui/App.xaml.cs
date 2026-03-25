@@ -19,6 +19,7 @@ public partial class App : Application
     public static IEventRepository? EventRepository { get; private set; }
     public static ITriviaRepository? TriviaRepository { get; private set; }
     public static IAmbassadorRepository? AmbassadorRepository { get; private set; }
+    public static MovieApp.Core.Services.IReferralValidator? ReferralValidator { get; private set; }
     public static MainWindow? CurrentMainWindow { get; private set; }
 
     public App()
@@ -60,6 +61,7 @@ public partial class App : Application
             EventRepository = eventRepository;
             TriviaRepository = triviaRepository;
             AmbassadorRepository = ambassadorRepository;
+            ReferralValidator = new MovieApp.Core.Services.ReferralValidator(ambassadorRepository);
 
             viewModel = new MainViewModel(_currentUserService.CurrentUser);
         }

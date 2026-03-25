@@ -133,7 +133,12 @@
                                 Style="{StaticResource SectionCaptionTextStyle}"
                                 Text="Use this column for paid-event checkout, free enrollment, duplicate-join protection, and final-price calculation." />
                             <TextBox Header="Ticket price" Text="49.99" />
-                            <TextBox Header="Referral code" PlaceholderText="Optional code" />
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
+                                <TextBox x:Name="ReferralCodeTextBox" Header="Referral code" PlaceholderText="Optional code" Width="200" />
+                                <Button x:Name="ValidateReferralCodeButton" Click="ValidateReferralCodeButton_Click" VerticalAlignment="Bottom" Height="32">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="14" />
+                                </Button>
+                            </StackPanel>
                             <CheckBox Content="Apply free-enrollment reward" />
                             <CheckBox Content="Apply trivia free ticket reward" />
                             <CheckBox Content="Apply slot-machine movie discount" />
