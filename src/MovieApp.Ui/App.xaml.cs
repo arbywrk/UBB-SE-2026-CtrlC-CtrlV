@@ -14,6 +14,8 @@ public partial class App : Application
     private Window? _window;
     private ICurrentUserService? _currentUserService;
 
+    public static ICurrentUserService? CurrentUserService { get; private set; }
+
     public static IEventRepository? EventRepository { get; private set; }
     public static ITriviaRepository? TriviaRepository { get; private set; }
     public static IAmbassadorRepository? AmbassadorRepository { get; private set; }
@@ -53,6 +55,7 @@ public partial class App : Application
 
             _currentUserService = new CurrentUserService(userRepository, bootstrapUserOptions);
             await _currentUserService.InitializeAsync();
+            CurrentUserService = _currentUserService;
 
             EventRepository = eventRepository;
             TriviaRepository = triviaRepository;

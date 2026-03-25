@@ -24,4 +24,21 @@ public static class ReferralSqlQueries
             SELECT 1 FROM dbo.AmbassadorProfile WHERE referral_code = @referralCode
         ) THEN 1 ELSE 0 END AS BIT);
         """;
+
+    /// <summary>
+    /// Gets the referral code for a specific user ID.
+    /// </summary>
+    public const string SelectReferralCodeByUserId = """
+        SELECT referral_code
+        FROM dbo.AmbassadorProfile
+        WHERE UserId = @userId;
+        """;
+
+    /// <summary>
+    /// Inserts a newly generated referral code for an ambassador (user).
+    /// </summary>
+    public const string InsertAmbassadorProfile = """
+        INSERT INTO dbo.AmbassadorProfile (UserId, referral_code)
+        VALUES (@userId, @referralCode);
+        """;
 }

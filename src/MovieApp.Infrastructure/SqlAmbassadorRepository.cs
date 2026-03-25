@@ -23,4 +23,27 @@ public sealed class SqlAmbassadorRepository : IAmbassadorRepository
         var result = await command.ExecuteScalarAsync(cancellationToken);
         return (bool)(result ?? false);
     }
+
+    public async Task<string?> GetReferralCodeAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand(ReferralSqlQueries.SelectReferralCodeByUserId, connection);
+        command.Parameters.AddWithValue("@userId", userId);
+
+        return await command.ExecuteScalarAsync(cancellationToken) as string;
+    }
+
+    public async Task CreateAmbassadorProfileAsync(int userId, string referralCode, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand(ReferralSqlQueries.InsertAmbassadorProfile, connection);
+        command.Parameters.AddWithValue("@userId", userId);
+        command.Parameters.AddWithValue("@referralCode", referralCode);
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
 }

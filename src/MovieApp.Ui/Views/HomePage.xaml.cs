@@ -42,6 +42,18 @@ public sealed partial class HomePage : Page
     {
         if (_initialized) return;
         _initialized = true;
+
+        if (App.AmbassadorRepository is not null && App.CurrentUserService?.CurrentUser is { } currentUser)
+        {
+            var existingCode = await App.AmbassadorRepository.GetReferralCodeAsync(currentUser.Id);
+            if (string.IsNullOrEmpty(existingCode))
+            {
+                var generator = new MovieApp.Core.Services.ReferralCodeGenerator();
+                var newCode = generator.Generate(currentUser.Username, currentUser.Id);
+                await App.AmbassadorRepository.CreateAmbassadorProfileAsync(currentUser.Id, newCode);
+            }
+        }
+
         await ViewModel.InitializeAsync();
     }
 
