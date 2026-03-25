@@ -11,4 +11,5 @@ public interface IMarathonService
     Task<bool> StartMarathonAsync(int marathonId);
 
     Task UpdateQuizResultAsync(int marathonId, int correctAnswers);
+    Task<bool> LogMovieAsync(int marathonId, int movieId, int correctAnswers);
 }
