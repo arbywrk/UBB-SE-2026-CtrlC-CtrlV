@@ -9,4 +9,6 @@ public interface IAmbassadorRepository
     Task AddReferralLogAsync(int ambassadorId, int friendId, int eventId, CancellationToken cancellationToken = default);
     Task<bool> TryApplyRewardAsync(int ambassadorId, CancellationToken cancellationToken = default);
     Task<System.Collections.Generic.IEnumerable<MovieApp.Core.Models.ReferralHistoryItem>> GetReferralHistoryAsync(int ambassadorId, CancellationToken cancellationToken = default);
+    Task<int> GetRewardBalanceAsync(int userId, CancellationToken cancellationToken = default);
+    Task DecrementRewardBalanceAsync(int userId, CancellationToken cancellationToken = default);
 }

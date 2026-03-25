@@ -80,13 +80,52 @@ public sealed partial class HomePage : Page
             return;
         }
 
+        var content = BuildEventDialogContent(selectedEvent);
+
+        // Check reward balance and add a Free Pass button if available
+        if (App.AmbassadorRepository is not null && App.CurrentUserService?.CurrentUser is { } currentUser)
+        {
+            int balance = await App.AmbassadorRepository.GetRewardBalanceAsync(currentUser.Id);
+            if (balance > 0 && content is StackPanel layout)
+            {
+                var freePassButton = new Button
+                {
+                    Content = $"Use Free Pass 🎟 ({balance} left)",
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                };
+
+                freePassButton.Click += async (_, _) =>
+                {
+                    var confirmDialog = new ContentDialog
+                    {
+                        XamlRoot = XamlRoot,
+                        Title = "Use Free Pass?",
+                        Content = "This will use 1 free enrollment credit. Continue?",
+                        PrimaryButtonText = "Yes, enroll for free",
+                        CloseButtonText = "Cancel",
+                        DefaultButton = ContentDialogButton.Primary,
+                    };
+
+                    var result = await confirmDialog.ShowAsync();
+                    if (result == ContentDialogResult.Primary)
+                    {
+                        await App.AmbassadorRepository.DecrementRewardBalanceAsync(currentUser.Id);
+                        freePassButton.Content = "✅ Free Pass applied!";
+                        freePassButton.IsEnabled = false;
+                    }
+                };
+
+                layout.Children.Add(freePassButton);
+            }
+        }
+
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
             Title = selectedEvent.Title,
             PrimaryButtonText = "Close",
             DefaultButton = ContentDialogButton.Primary,
-            Content = BuildEventDialogContent(selectedEvent),
+            Content = content,
         };
 
         await dialog.ShowAsync();

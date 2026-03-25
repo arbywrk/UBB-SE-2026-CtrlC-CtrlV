@@ -97,4 +97,22 @@ public static class ReferralSqlQueries
         WHERE l.AmbassadorID = @ambassadorId
         ORDER BY l.UsedAt DESC;
         """;
+
+    /// <summary>
+    /// Gets the current reward_balance for a user.
+    /// </summary>
+    public const string SelectRewardBalance = """
+        SELECT reward_balance
+        FROM dbo.AmbassadorProfile
+        WHERE UserId = @userId;
+        """;
+
+    /// <summary>
+    /// Safely decrements reward_balance by 1, minimum 0.
+    /// </summary>
+    public const string DecrementRewardBalance = """
+        UPDATE dbo.AmbassadorProfile
+        SET reward_balance = CASE WHEN reward_balance > 0 THEN reward_balance - 1 ELSE 0 END
+        WHERE UserId = @userId;
+        """;
 }

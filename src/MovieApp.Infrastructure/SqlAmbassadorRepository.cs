@@ -106,4 +106,27 @@ public sealed class SqlAmbassadorRepository : IAmbassadorRepository
 
         return results;
     }
+
+    public async Task<int> GetRewardBalanceAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand(ReferralSqlQueries.SelectRewardBalance, connection);
+        command.Parameters.AddWithValue("@userId", userId);
+
+        var result = await command.ExecuteScalarAsync(cancellationToken);
+        return result is int balance ? balance : 0;
+    }
+
+    public async Task DecrementRewardBalanceAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand(ReferralSqlQueries.DecrementRewardBalance, connection);
+        command.Parameters.AddWithValue("@userId", userId);
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
 }
