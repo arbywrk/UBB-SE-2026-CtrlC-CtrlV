@@ -12,4 +12,17 @@ public sealed partial class DetailsCheckoutPage : Page
     {
         InitializeComponent();
     }
+
+    private async void ValidateReferralCodeButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(ReferralCodeTextBox.Text)) return;
+
+        if (App.ReferralValidator is not null && App.CurrentUserService?.CurrentUser is { } currentUser)
+        {
+            bool isValid = await App.ReferralValidator.IsValidReferralAsync(ReferralCodeTextBox.Text, currentUser.Id);
+            ReferralCodeTextBox.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                isValid ? Microsoft.UI.Colors.Green : Microsoft.UI.Colors.Red);
+            ReferralCodeTextBox.BorderThickness = new Microsoft.UI.Xaml.Thickness(2);
+        }
+    }
 }
