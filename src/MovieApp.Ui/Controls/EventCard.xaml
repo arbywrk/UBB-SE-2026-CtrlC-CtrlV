@@ -57,20 +57,30 @@
                 Grid.Row="1"
                 Padding="16"
                 Spacing="12">
-                <StackPanel Spacing="8">
-                    <TextBlock
-                        Style="{ThemeResource SubtitleTextBlockStyle}"
-                        Text="{x:Bind TitleText, Mode=OneWay}"
-                        TextTrimming="CharacterEllipsis"
-                        TextWrapping="WrapWholeWords" />
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="8">
+                        <TextBlock
+                            Style="{ThemeResource SubtitleTextBlockStyle}"
+                            Text="{x:Bind TitleText, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="WrapWholeWords" />
 
-                    <TextBlock
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        MaxLines="2"
-                        Text="{x:Bind DescriptionText, Mode=OneWay}"
-                        TextTrimming="CharacterEllipsis"
-                        TextWrapping="WrapWholeWords" />
-                </StackPanel>
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            MaxLines="2"
+                            Text="{x:Bind DescriptionText, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                    
+                    <Button x:Name="FavoriteButton" Grid.Column="1" VerticalAlignment="Top" Width="36" Height="36" Padding="0" Background="Transparent" BorderThickness="0" Click="ToggleFavorite_Click" ToolTipService.ToolTip="Toggle Favorite">
+                        <FontIcon x:Name="FavoriteIcon" Glyph="&#xEB51;" FontSize="16" />
+                    </Button>
+                </Grid>
 
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>

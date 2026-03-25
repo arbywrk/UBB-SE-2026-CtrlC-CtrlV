@@ -15,5 +15,19 @@ BEGIN
         ('Director''s Q&A: Sci-Fi Night', 'Watch the latest sci-fi hit followed by a talk.', '', DATEADD(day, 7, GETDATE()), 'Tech Hub Theater', 15.00, 'Special', 4.9, 200, 150, @CreatorId),
         ('Indie Documentary Showcase', 'Exploring hidden stories from across the globe.', '', DATEADD(day, -1, GETDATE()), 'Art House', 10.00, 'Screening', 4.2, 30, 30, @CreatorId);
     END
+
+    DECLARE @EventId INT = (SELECT TOP 1 Id FROM dbo.Events WHERE Title = 'Cannes Winner Screening');
+    
+    IF @EventId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM dbo.FavoriteEvents WHERE UserId = @CreatorId AND EventId = @EventId)
+    BEGIN
+        INSERT INTO dbo.FavoriteEvents (UserId, EventId, CreatedAt)
+        VALUES (@CreatorId, @EventId, GETUTCDATE());
+        
+        IF NOT EXISTS (SELECT 1 FROM dbo.Notifications WHERE UserId = @CreatorId AND EventId = @EventId)
+        BEGIN
+            INSERT INTO dbo.Notifications (UserId, EventId, Type, Message, State, CreatedAt)
+            VALUES (@CreatorId, @EventId, 'PRICE_DROP', 'Welcome! We dropped the price of your favorite event!', 'Unread', GETUTCDATE());
+        END
+    END
 END
 GO

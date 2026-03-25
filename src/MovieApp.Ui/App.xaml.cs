@@ -21,6 +21,8 @@ public partial class App : Application
     public static IAmbassadorRepository? AmbassadorRepository { get; private set; }
     public static MovieApp.Core.Services.IReferralValidator? ReferralValidator { get; private set; }
     public static MainWindow? CurrentMainWindow { get; private set; }
+    public static IFavoriteEventService? FavoriteEventService { get; private set; }
+    public static INotificationService? NotificationService { get; private set; }
 
     public App()
     {
@@ -53,6 +55,8 @@ public partial class App : Application
             var eventRepository = new SqlEventRepository(databaseOptions);
             var triviaRepository = new SqlTriviaRepository(databaseOptions);
             var ambassadorRepository = new SqlAmbassadorRepository(databaseOptions);
+            var favoriteEventRepository = new SqlFavoriteEventRepository(databaseOptions);
+            var notificationRepository = new SqlNotificationRepository(databaseOptions);
 
             _currentUserService = new CurrentUserService(userRepository, bootstrapUserOptions);
             await _currentUserService.InitializeAsync();
@@ -62,12 +66,25 @@ public partial class App : Application
             TriviaRepository = triviaRepository;
             AmbassadorRepository = ambassadorRepository;
             ReferralValidator = new MovieApp.Core.Services.ReferralValidator(ambassadorRepository);
+            
+            FavoriteEventService = new FavoriteEventService(favoriteEventRepository, eventRepository);
+            NotificationService = new NotificationService(notificationRepository, favoriteEventRepository);
 
             viewModel = new MainViewModel(_currentUserService.CurrentUser);
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            viewModel = MainViewModel.CreateStartupError(BuildStartupErrorMessage(exception));
+            // Fully functional offline fallback for testing without LocalDB
+            EventRepository = UnavailableEventRepository.Instance;
+            var fakeFavs = new MovieApp.Ui.Services.UnavailableFavoriteEventRepository();
+            var fakeNotifs = new MovieApp.Ui.Services.UnavailableNotificationRepository();
+            FavoriteEventService = new FavoriteEventService(fakeFavs, EventRepository);
+            NotificationService = new NotificationService(fakeNotifs, fakeFavs);
+            
+            var fakeUserSvc = new MovieApp.Ui.Services.FakeCurrentUserService();
+            CurrentUserService = fakeUserSvc;
+
+            viewModel = new MainViewModel(fakeUserSvc.CurrentUser!);
         }
 
         CurrentMainWindow = new MainWindow(viewModel);

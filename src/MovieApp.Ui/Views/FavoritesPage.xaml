@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:MovieApp.Ui.Controls"
     mc:Ignorable="d">
 
     <ScrollViewer
@@ -61,11 +62,31 @@
                         <TextBlock
                             Style="{StaticResource SectionCaptionTextStyle}"
                             Text="Only persisted events should be addable, duplicates must be blocked, and the list should remain user-specific." />
-                        <ListView Height="420">
-                            <ListViewItem Content="Sci-fi Premiere | 2026-04-03 | Downtown Hall | 39.99" />
-                            <ListViewItem Content="Classic Marathon | 2026-04-06 | Grand Theater | 44.99" />
-                            <ListViewItem Content="Indie Showcase | 2026-04-09 | Campus Hall | Free" />
-                        </ListView>
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Height="420">
+                            <ItemsControl ItemsSource="{Binding VisibleEvents}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="12" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnSpacing="16">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <ui:EventCard Model="{Binding}" />
+                                            
+                                            <Button Grid.Column="1" VerticalAlignment="Center" Content="Remove Favorite" 
+                                                    Click="RemoveFavorite_Click" DataContext="{Binding}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
                     </StackPanel>
                 </Border>
 

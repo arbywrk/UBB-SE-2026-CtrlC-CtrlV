@@ -12,5 +12,7 @@ public interface IEventRepository
 
     Task<int> AddAsync(Event @event, CancellationToken cancellationToken = default);
 
+    Task<bool> UpdateAsync(Event @event, CancellationToken cancellationToken = default);
+
     Task<bool> UpdateEnrollmentAsync(int eventId, int newCount, CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,4 @@
-﻿using MovieApp.Core.Models;
+using MovieApp.Core.Models;
 using MovieApp.Core.Repositories;
 using MovieApp.Ui.ViewModels.Events;
 using Xunit;
@@ -188,6 +188,11 @@ public sealed class SectionEventsViewModelTests
         public Task<int> AddAsync(Event @event, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(1);
+        }
+
+        public Task<bool> UpdateAsync(Event @event, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(true);
         }
 
         public Task<bool> UpdateEnrollmentAsync(int eventId, int newCount, CancellationToken cancellationToken = default)
