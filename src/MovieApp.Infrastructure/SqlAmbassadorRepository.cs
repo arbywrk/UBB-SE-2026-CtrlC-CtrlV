@@ -58,4 +58,17 @@ public sealed class SqlAmbassadorRepository : IAmbassadorRepository
         var result = await command.ExecuteScalarAsync(cancellationToken);
         return result as int?;
     }
+
+    public async Task AddReferralLogAsync(int ambassadorId, int friendId, int eventId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand(ReferralSqlQueries.InsertReferralLog, connection);
+        command.Parameters.AddWithValue("@ambassadorId", ambassadorId);
+        command.Parameters.AddWithValue("@friendId", friendId);
+        command.Parameters.AddWithValue("@eventId", eventId);
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
 }

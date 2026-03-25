@@ -50,4 +50,12 @@ public static class ReferralSqlQueries
         FROM dbo.AmbassadorProfile
         WHERE referral_code = @referralCode;
         """;
+
+    /// <summary>
+    /// Inserts a new referral log entry when an enrollment happens.
+    /// </summary>
+    public const string InsertReferralLog = """
+        INSERT INTO dbo.ReferralLog (AmbassadorID, FriendID, EventID)
+        VALUES (@ambassadorId, @friendId, @eventId);
+        """;
 }
