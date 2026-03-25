@@ -17,4 +17,12 @@ public static class TriviaSqlQueries
         FROM dbo.TriviaQuestions
         WHERE Category = @category;
         """;
+
+    public const string SelectRandomByMovieId = """
+    SELECT TOP (@count) Id, QuestionText, Category,
+           OptionA, OptionB, OptionC, OptionD, CorrectOption, MovieId
+    FROM dbo.TriviaQuestions
+    WHERE MovieId = @movieId
+    ORDER BY NEWID();
+    """;
 }
