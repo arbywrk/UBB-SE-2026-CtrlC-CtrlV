@@ -71,4 +71,16 @@ public sealed class SqlAmbassadorRepository : IAmbassadorRepository
 
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
+
+    public async Task<bool> TryApplyRewardAsync(int ambassadorId, CancellationToken cancellationToken = default)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand(ReferralSqlQueries.ApplyRewardIfEligible, connection);
+        command.Parameters.AddWithValue("@ambassadorId", ambassadorId);
+
+        var result = await command.ExecuteScalarAsync(cancellationToken);
+        return (bool)(result ?? false);
+    }
 }

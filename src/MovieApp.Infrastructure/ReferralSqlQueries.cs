@@ -58,4 +58,28 @@ public static class ReferralSqlQueries
         INSERT INTO dbo.ReferralLog (AmbassadorID, FriendID, EventID)
         VALUES (@ambassadorId, @friendId, @eventId);
         """;
+
+    /// <summary>
+    /// Checks if a user has 3 logs, deletes the 3 oldest, and increments reward_balance atomically.
+    /// </summary>
+    public const string ApplyRewardIfEligible = """
+        DECLARE @LogsToClear TABLE (Id INT);
+
+        INSERT INTO @LogsToClear
+        SELECT TOP 3 Id
+        FROM dbo.ReferralLog
+        WHERE AmbassadorID = @ambassadorId
+        ORDER BY UsedAt ASC;
+
+        IF (SELECT COUNT(*) FROM @LogsToClear) = 3
+        BEGIN
+            DELETE FROM dbo.ReferralLog WHERE Id IN (SELECT Id FROM @LogsToClear);
+            UPDATE dbo.AmbassadorProfile SET reward_balance = reward_balance + 1 WHERE UserId = @ambassadorId;
+            SELECT CAST(1 AS BIT);
+        END
+        ELSE
+        BEGIN
+            SELECT CAST(0 AS BIT);
+        END
+        """;
 }

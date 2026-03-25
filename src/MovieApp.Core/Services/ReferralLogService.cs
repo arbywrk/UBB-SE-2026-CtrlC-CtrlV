@@ -17,6 +17,7 @@ public sealed class ReferralLogService : IReferralLogService
         if (ambassadorId.HasValue)
         {
             await _ambassadorRepository.AddReferralLogAsync(ambassadorId.Value, friendId, eventId, cancellationToken);
+            await _ambassadorRepository.TryApplyRewardAsync(ambassadorId.Value, cancellationToken);
         }
     }
 }

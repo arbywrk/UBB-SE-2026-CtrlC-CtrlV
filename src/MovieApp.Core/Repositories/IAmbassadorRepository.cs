@@ -7,4 +7,5 @@ public interface IAmbassadorRepository
     Task CreateAmbassadorProfileAsync(int userId, string referralCode, CancellationToken cancellationToken = default);
     Task<int?> GetUserIdByReferralCodeAsync(string referralCode, CancellationToken cancellationToken = default);
     Task AddReferralLogAsync(int ambassadorId, int friendId, int eventId, CancellationToken cancellationToken = default);
+    Task<bool> TryApplyRewardAsync(int ambassadorId, CancellationToken cancellationToken = default);
 }
