@@ -42,4 +42,22 @@ public sealed class SqlTriviaRepository(DatabaseOptions databaseOptions) : ITriv
             MovieId = reader.IsDBNull(8) ? null : reader.GetInt32(8)
         };
     }
+    public async Task<IEnumerable<TriviaQuestion>> GetByMovieIdAsync(
+    int movieId, int count = 3, CancellationToken cancellationToken = default)
+    {
+        var questions = new List<TriviaQuestion>();
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand(
+            TriviaSqlQueries.SelectRandomByMovieId, connection);
+        command.Parameters.AddWithValue("@movieId", movieId);
+        command.Parameters.AddWithValue("@count", count);
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        while (await reader.ReadAsync(cancellationToken))
+            questions.Add(MapTriviaQuestion(reader));
+
+        return questions;
+    }
 }
