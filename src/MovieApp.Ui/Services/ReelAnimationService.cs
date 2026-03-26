@@ -1,5 +1,4 @@
 using MovieApp.Core.Models.Movie;
-using MovieApp.Core.Services;
 
 namespace MovieApp.Ui.Services;
 
@@ -58,6 +57,9 @@ public sealed class ReelAnimationService
     /// </summary>
     private async Task AnimateReelAsync(List<object> values, int delayMs, CancellationToken cancellationToken)
     {
+        if (values.Count == 0)
+            return;
+
         // Initial delay before this reel starts
         await Task.Delay(delayMs, cancellationToken);
 

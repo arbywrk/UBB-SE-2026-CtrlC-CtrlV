@@ -22,6 +22,17 @@ public partial class App : Application
     public static IReferralValidator? ReferralValidator { get; private set; }
     public static MainWindow? CurrentMainWindow { get; private set; }
     public static int CurrentUserId { get; private set; }
+    public static IMovieRepository? MovieRepository { get; private set; }
+    public static IUserSlotMachineStateRepository? SlotMachineStateRepository { get; private set; }
+    public static IUserMovieDiscountRepository? UserMovieDiscountRepository { get; private set; }
+    public static IScreeningRepository? ScreeningRepository { get; private set; }
+    public static SlotMachineService? SlotMachineService { get; private set; }
+    public static SlotMachineResultService? SlotMachineResultService { get; private set; }
+    public static ReelAnimationService? ReelAnimationService { get; private set; }
+    public static MovieApp.Core.Services.IReferralValidator? ReferralValidator { get; private set; }
+    public static MainWindow? CurrentMainWindow { get; private set; }
+    public static IConfigurationRoot? Configuration { get; private set; }
+    public static IMarathonRepository? MarathonRepository { get; private set; }
 
     public App()
     {
@@ -39,6 +50,7 @@ public partial class App : Application
         try
         {
             var configuration = BuildConfiguration();
+            Configuration = configuration;
             var databaseOptions = new DatabaseOptions
             {
                 ConnectionString = configuration["Database:ConnectionString"]
@@ -57,10 +69,24 @@ public partial class App : Application
             var triviaRepository = new SqlTriviaRepository(databaseOptions);
             var triviaRewardRepository = new SqlTriviaRewardRepository(databaseOptions);
             var ambassadorRepository = new SqlAmbassadorRepository(databaseOptions);
+            var movieRepository = new SqlMovieRepository(databaseOptions);
+            var slotMachineStateRepository = new SqlUserSlotMachineStateRepository(databaseOptions);
+            var userMovieDiscountRepository = new SqlUserRewardRepository(databaseOptions);
+            var screeningRepository = new SqlScreeningRepository(databaseOptions);
+            var marathonRepository = new SqlMarathonRepository(databaseOptions);
 
             _currentUserService = new CurrentUserService(userRepository, bootstrapUserOptions);
             await _currentUserService.InitializeAsync();
             CurrentUserService = _currentUserService;
+
+            var slotMachineService = new SlotMachineService(
+                slotMachineStateRepository,
+                movieRepository,
+                eventRepository,
+                userMovieDiscountRepository);
+
+            var slotMachineResultService = new SlotMachineResultService(userMovieDiscountRepository);
+            var reelAnimationService = new ReelAnimationService();
 
             EventRepository = eventRepository;
             TriviaRepository = triviaRepository;
@@ -68,6 +94,15 @@ public partial class App : Application
             AmbassadorRepository = ambassadorRepository;
             ReferralValidator = new ReferralValidator(ambassadorRepository);
             CurrentUserId = _currentUserService.CurrentUser.Id;
+            MovieRepository = movieRepository;
+            SlotMachineStateRepository = slotMachineStateRepository;
+            UserMovieDiscountRepository = userMovieDiscountRepository;
+            ScreeningRepository = screeningRepository;
+            SlotMachineService = slotMachineService;
+            SlotMachineResultService = slotMachineResultService;
+            ReelAnimationService = reelAnimationService;
+            MarathonRepository = marathonRepository;
+            ReferralValidator = new MovieApp.Core.Services.ReferralValidator(ambassadorRepository);
 
             viewModel = new MainViewModel(_currentUserService.CurrentUser);
         }
