@@ -199,5 +199,10 @@ public sealed class SectionEventsViewModelTests
         {
             return Task.FromResult(true);
         }
+
+        public Task UpdateEventAsync(Event updatedEvent, CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

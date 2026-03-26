@@ -21,6 +21,12 @@ public partial class App : Application
     public static IAmbassadorRepository? AmbassadorRepository { get; private set; }
     public static MovieApp.Core.Services.IReferralValidator? ReferralValidator { get; private set; }
     public static MainWindow? CurrentMainWindow { get; private set; }
+<<<<<<< Updated upstream
+=======
+    public static IConfigurationRoot? Configuration { get; private set; }
+    public static IMarathonRepository? MarathonRepository { get; private set; }
+    
+>>>>>>> Stashed changes
     public static IFavoriteEventService? FavoriteEventService { get; private set; }
     public static INotificationService? NotificationService { get; private set; }
 
@@ -38,9 +44,15 @@ public partial class App : Application
         try
         {
             var configuration = BuildConfiguration();
+<<<<<<< Updated upstream
+=======
+            Configuration = configuration;
+            var connectionString = configuration["Database:ConnectionString"];
+            
+>>>>>>> Stashed changes
             var databaseOptions = new DatabaseOptions
             {
-                ConnectionString = configuration["Database:ConnectionString"]
+                ConnectionString = connectionString
                     ?? throw new InvalidOperationException("Missing configuration value 'Database:ConnectionString'."),
             };
             var bootstrapUserOptions = new BootstrapUserOptions
@@ -70,10 +82,17 @@ public partial class App : Application
             FavoriteEventService = new FavoriteEventService(favoriteEventRepository, eventRepository);
             NotificationService = new NotificationService(notificationRepository, favoriteEventRepository);
 
+            var favoriteEventRepository = new SqlFavoriteEventRepository(databaseOptions);
+            var notificationRepository = new SqlNotificationRepository(databaseOptions);
+
+            FavoriteEventService = new FavoriteEventService(favoriteEventRepository, eventRepository);
+            NotificationService = new NotificationService(notificationRepository, favoriteEventRepository, eventRepository);
+
             viewModel = new MainViewModel(_currentUserService.CurrentUser);
         }
         catch (Exception)
         {
+<<<<<<< Updated upstream
             // Fully functional offline fallback for testing without LocalDB
             EventRepository = UnavailableEventRepository.Instance;
             var fakeFavs = new MovieApp.Ui.Services.UnavailableFavoriteEventRepository();
@@ -85,6 +104,26 @@ public partial class App : Application
             CurrentUserService = fakeUserSvc;
 
             viewModel = new MainViewModel(fakeUserSvc.CurrentUser!);
+=======
+            // If LocalDB is not found, we still want to show the app in DEMO MODE as requested.
+            if (exception.Message.Contains("Local Database Runtime") || exception.InnerException?.Message.Contains("Local Database Runtime") == true)
+            {
+                var dummyUserRepo = new DummyUserRepository();
+                _currentUserService = new CurrentUserService(dummyUserRepo, new BootstrapUserOptions { AuthProvider = "dummy", AuthSubject = "default-user" });
+                _currentUserService.InitializeAsync().Wait();
+                CurrentUserService = _currentUserService;
+
+                var favoriteRepo = new InMemoryFavoriteEventRepository();
+                FavoriteEventService = new FavoriteEventService(favoriteRepo, UnavailableEventRepository.Instance);
+                NotificationService = new NotificationService(new InMemoryNotificationRepository(), favoriteRepo, UnavailableEventRepository.Instance);
+
+                viewModel = new MainViewModel(_currentUserService.CurrentUser);
+            }
+            else
+            {
+                viewModel = MainViewModel.CreateStartupError(BuildStartupErrorMessage(exception));
+            }
+>>>>>>> Stashed changes
         }
 
         CurrentMainWindow = new MainWindow(viewModel);

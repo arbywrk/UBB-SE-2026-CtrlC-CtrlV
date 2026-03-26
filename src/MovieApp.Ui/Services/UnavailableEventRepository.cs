@@ -37,6 +37,11 @@ public sealed class UnavailableEventRepository : IEventRepository
         return Task.FromResult<Event?>(_events.FirstOrDefault(e => e.Id == id));
     }
 
+    public Task UpdateEventAsync(Event updatedEvent, CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
+    }
+
     public Task<int> AddAsync(Event @event, CancellationToken cancellationToken = default)
     {
         _events.Add(@event);

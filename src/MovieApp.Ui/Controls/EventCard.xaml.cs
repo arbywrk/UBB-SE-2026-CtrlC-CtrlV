@@ -141,7 +141,34 @@ public sealed partial class EventCard : UserControl
         }
     }
 
+<<<<<<< Updated upstream
     private async void RefreshComputedProperties()
+=======
+        var dialog = new SeatGuideDialog(capacity)
+        {
+            XamlRoot = this.XamlRoot 
+        };
+
+        await dialog.ShowAsync();
+    }
+
+    private async void Favorite_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (EventModel is null) return;
+
+        var favoriteService = App.FavoriteEventService;
+        var currentUserService = App.CurrentUserService;
+
+        if (favoriteService is not null && currentUserService?.CurrentUser is not null)
+        {
+            await favoriteService.AddFavoriteAsync(currentUserService.CurrentUser.Id, EventModel.Id);
+            
+            // Show a simple success feedback (can use a dialog or just silently succeed)
+        }
+    }
+
+    private void RefreshComputedProperties()
+>>>>>>> Stashed changes
     {
         Bindings.Update();
         await UpdateFavoriteIconAsync();

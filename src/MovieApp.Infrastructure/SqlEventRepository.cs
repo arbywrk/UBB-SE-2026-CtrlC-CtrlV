@@ -147,6 +147,42 @@ public sealed class SqlEventRepository(DatabaseOptions databaseOptions) : IEvent
         return rowsAffected > 0;
     }
 
+    public async Task UpdateEventAsync(Event updatedEvent, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            UPDATE dbo.Events
+            SET Title = @title,
+                Description = @description,
+                PosterUrl = @posterUrl,
+                EventDateTime = @eventDateTime,
+                LocationReference = @locationReference,
+                TicketPrice = @ticketPrice,
+                EventType = @eventType,
+                HistoricalRating = @historicalRating,
+                MaxCapacity = @maxCapacity,
+                CurrentEnrollment = @currentEnrollment
+            WHERE Id = @id;
+            """;
+
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@id", updatedEvent.Id);
+        command.Parameters.AddWithValue("@title", updatedEvent.Title);
+        command.Parameters.AddWithValue("@description", updatedEvent.Description ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@posterUrl", updatedEvent.PosterUrl);
+        command.Parameters.AddWithValue("@eventDateTime", updatedEvent.EventDateTime);
+        command.Parameters.AddWithValue("@locationReference", updatedEvent.LocationReference);
+        command.Parameters.AddWithValue("@ticketPrice", updatedEvent.TicketPrice);
+        command.Parameters.AddWithValue("@eventType", updatedEvent.EventType);
+        command.Parameters.AddWithValue("@historicalRating", updatedEvent.HistoricalRating);
+        command.Parameters.AddWithValue("@maxCapacity", updatedEvent.MaxCapacity);
+        command.Parameters.AddWithValue("@currentEnrollment", updatedEvent.CurrentEnrollment);
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
     /// <summary>
     /// Maps an event row using the column order defined in <see cref="EventSqlQueries.Projection"/>.
     /// </summary>

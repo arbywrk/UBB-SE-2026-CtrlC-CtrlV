@@ -1,4 +1,6 @@
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using MovieApp.Ui.ViewModels;
 
 using MovieApp.Ui.ViewModels.Events;
 
@@ -10,11 +12,16 @@ namespace MovieApp.Ui.Views;
 /// </summary>
 public sealed partial class NotificationsPage : Page
 {
+    private bool _initialized;
+
+    public NotificationsViewModel ViewModel { get; }
+
     public NotificationsPage()
     {
         ViewModel = new NotificationsViewModel();
         InitializeComponent();
         DataContext = ViewModel;
+<<<<<<< Updated upstream
         Loaded += async (s, e) => { await ViewModel.InitializeAsync(); };
     }
 
@@ -26,5 +33,15 @@ public sealed partial class NotificationsPage : Page
         {
             await ViewModel.RemoveNotificationAsync(notification.Id);
         }
+=======
+        Loaded += NotificationsPage_Loaded;
+    }
+
+    private async void NotificationsPage_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (_initialized) return;
+        _initialized = true;
+        await ViewModel.InitializeAsync();
+>>>>>>> Stashed changes
     }
 }

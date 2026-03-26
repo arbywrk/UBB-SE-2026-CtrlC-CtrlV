@@ -68,21 +68,27 @@ public sealed class EventSqlQueriesTests
     [Fact(Skip = "Bootstrap script has been deleted or renamed")]
     public void BootstrapScript_IncludesAllCurrentDatabaseScripts()
     {
-        // TODO: This test is pinned to deleted/renamed files.
-        // Fix by either restoring 000-bootstrap.sql as the canonical script entrypoint, or updating this test to match the current script layout and filenames.
-        var bootstrapFile = ReadRepoFile("src", "MovieApp.Infrastructure", "Database", "Scripts", "000-bootstrap.sql");
+        var clearDbFile = ReadRepoFile("src", "MovieApp.Infrastructure", "Database", "Scripts", "000-clear-db.sql");
 
+<<<<<<< Updated upstream
         Assert.Contains(@":r .\006-user-spins.sql", bootstrapFile);
         Assert.Contains(@":r .\007-create-movies.sql", bootstrapFile);
         Assert.Contains(@":r .\008-create-user-movie-discounts.sql", bootstrapFile);
         Assert.Contains(@":r .\009-create-marathon.sql", bootstrapFile);
         Assert.Contains(@":r .\012-seed-events.sql", bootstrapFile);
+=======
+        Assert.Contains("DROP DATABASE", clearDbFile);
+        Assert.Contains("MovieApp", clearDbFile);
+>>>>>>> Stashed changes
     }
 
     [Fact]
     public void SeedEventsScript_IsGuardedAgainstDuplicateSeedData()
     {
+<<<<<<< Updated upstream
         // 010-seed-events.sql was renamed to 012-seed-events.sql by the user.
+=======
+>>>>>>> Stashed changes
         var seedScript = ReadRepoFile("src", "MovieApp.Infrastructure", "Database", "Scripts", "012-seed-events.sql");
 
         Assert.Contains("IF NOT EXISTS", seedScript);
