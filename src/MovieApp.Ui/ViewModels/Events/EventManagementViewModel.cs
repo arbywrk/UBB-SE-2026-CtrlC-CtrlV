@@ -57,8 +57,8 @@ public sealed class EventManagementViewModel : EventListPageViewModel
     public string FormEventType { get; set; } = string.Empty;
     public string FormDescription { get; set; } = string.Empty;
     public DateTimeOffset? FormDate { get; set; }
-    public TimeSpan? FormTime { get; set; }
-    public decimal FormPrice { get; set; }
+    public TimeSpan FormTime { get; set; }
+    public double FormPrice { get; set; }
     public int FormCapacity { get; set; }
     public string FormPosterUrl { get; set; } = string.Empty;
 
@@ -103,7 +103,7 @@ public sealed class EventManagementViewModel : EventListPageViewModel
         if (!Validate(out var error)) { ValidationMessage = error; return; }
 
         ValidationMessage = string.Empty;
-        var date = FormDate!.Value.Date + (FormTime ?? TimeSpan.Zero);
+        var date = FormDate!.Value.Date + FormTime;
         var currentUserId = App.CurrentUserService?.CurrentUser.Id ?? 0;
 
         var newEvent = new Event
@@ -112,7 +112,7 @@ public sealed class EventManagementViewModel : EventListPageViewModel
             Title = FormTitle.Trim(),
             Description = FormDescription,
             LocationReference = FormLocation.Trim(),
-            TicketPrice = FormPrice,
+            TicketPrice = (decimal)FormPrice,
             EventDateTime = date,
             EventType = FormEventType.Trim(),
             MaxCapacity = FormCapacity > 0 ? FormCapacity : 50,
@@ -130,7 +130,7 @@ public sealed class EventManagementViewModel : EventListPageViewModel
         if (!Validate(out var error)) { ValidationMessage = error; return; }
 
         ValidationMessage = string.Empty;
-        var date = FormDate!.Value.Date + (FormTime ?? TimeSpan.Zero);
+        var date = FormDate!.Value.Date + FormTime;
 
         var updated = new Event
         {
@@ -138,7 +138,7 @@ public sealed class EventManagementViewModel : EventListPageViewModel
             Title = FormTitle.Trim(),
             Description = FormDescription,
             LocationReference = FormLocation.Trim(),
-            TicketPrice = FormPrice,
+            TicketPrice = (decimal)FormPrice,
             EventDateTime = date,
             EventType = FormEventType.Trim(),
             MaxCapacity = FormCapacity > 0 ? FormCapacity : SelectedEvent.MaxCapacity,

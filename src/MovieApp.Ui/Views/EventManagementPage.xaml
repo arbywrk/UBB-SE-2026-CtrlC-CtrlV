@@ -78,14 +78,15 @@
                                 Grid.Column="1"
                                 Orientation="Horizontal"
                                 Spacing="8">
-                                <Button Content="Create" />
+                                <Button Content="Create" Command="{x:Bind ViewModel.CreateEventCommand}" />
                                 <Button Content="Refresh" />
                             </StackPanel>
                         </Grid>
 
                         <ListView
-                            Height="440"
-                            ItemsSource="{Binding VisibleEvents}">
+                        Height="440"
+                        ItemsSource="{Binding VisibleEvents}"
+                        SelectedItem="{x:Bind ViewModel.SelectedEvent, Mode=TwoWay}">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <Grid ColumnSpacing="12">
@@ -96,7 +97,6 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-
                                         <TextBlock Text="{Binding Id}" />
                                         <TextBlock Grid.Column="1" Text="{Binding Title}" />
                                         <TextBlock Grid.Column="2" Text="{Binding EventDateTime}" />
@@ -140,8 +140,8 @@
                                 Height="120"
                                 PlaceholderText="Select an event to inspect its description, poster, and screening summary." />
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Button Content="Edit selected" />
-                                <Button Content="Delete selected" />
+                                <Button Content="Edit selected" Command="{x:Bind ViewModel.EditEventCommand}" />
+                                <Button Content="Delete selected" Command="{x:Bind ViewModel.DeleteEventCommand}" />
                                 <Button Content="Simulate Update (For Notifications)" Command="{x:Bind ViewModel.SimulateUpdateCommand}" />
                             </StackPanel>
                         </StackPanel>
@@ -161,6 +161,9 @@
                                 <ListViewItem Content="Date must be valid and in the expected range" />
                                 <ListViewItem Content="Ticket price cannot be negative" />
                             </ListView>
+                            <TextBlock
+    Text="{x:Bind ViewModel.ValidationMessage, Mode=OneWay}"
+    Foreground="{ThemeResource SystemErrorTextColor}" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -183,11 +186,12 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <TextBox Header="Title" PlaceholderText="Event title" />
+                        <TextBox Header="Title" PlaceholderText="Event title" Text="{x:Bind ViewModel.FormTitle, Mode=TwoWay}" />
                         <TextBox
-                            Grid.Column="1"
-                            Header="Location"
-                            PlaceholderText="Venue and hall" />
+                        Grid.Column="1"
+                        Header="Location"
+                        PlaceholderText="Venue and hall"
+                        Text="{x:Bind ViewModel.FormLocation, Mode=TwoWay}" />
                         <ComboBox
                             Grid.Column="2"
                             Header="Event type"
@@ -198,31 +202,35 @@
                         </ComboBox>
 
                         <CalendarDatePicker
-                            Grid.Row="1"
-                            Header="Date" />
+    Grid.Row="1"
+    Header="Date"
+    Date="{x:Bind ViewModel.FormDate, Mode=TwoWay}" />
                         <TimePicker
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Header="Time" />
+    Grid.Row="1"
+    Grid.Column="1"
+    Header="Time"
+    Time="{x:Bind ViewModel.FormTime, Mode=TwoWay}" />
                         <controls:NumberBox
-                            Grid.Row="1"
-                            Grid.Column="2"
-                            Header="Ticket price"
-                            PlaceholderText="0.00" />
+    Grid.Row="1"
+    Grid.Column="2"
+    Header="Ticket price"
+    PlaceholderText="0.00"
+    Value="{x:Bind ViewModel.FormPrice, Mode=TwoWay}" />
 
                         <TextBox
-                            Grid.Row="2"
-                            Grid.ColumnSpan="2"
-                            AcceptsReturn="True"
-                            Header="Description"
-                            Height="120"
-                            TextWrapping="Wrap" />
+    Grid.Row="2"
+    Grid.ColumnSpan="2"
+    AcceptsReturn="True"
+    Header="Description"
+    Height="120"
+    TextWrapping="Wrap"
+    Text="{x:Bind ViewModel.FormDescription, Mode=TwoWay}" />
                         <StackPanel
                             Grid.Row="2"
                             Grid.Column="2"
                             Spacing="10">
-                            <controls:NumberBox Header="Capacity" PlaceholderText="150" />
-                            <TextBox Header="Poster path" PlaceholderText="assets/posters/..." />
+                            <controls:NumberBox Header="Capacity" PlaceholderText="150" Value="{x:Bind ViewModel.FormCapacity, Mode=TwoWay}" />
+                            <TextBox Header="Poster path" PlaceholderText="assets/posters/..." Text="{x:Bind ViewModel.FormPosterUrl, Mode=TwoWay}" />
                             <Button Content="Simulate Price Drop &amp; Seat Availability" Click="SimulateUpdate_Click" />
                         </StackPanel>
                     </Grid>
