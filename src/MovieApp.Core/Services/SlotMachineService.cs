@@ -28,6 +28,14 @@ public sealed class SlotMachineService
     {
         var state = await _stateRepository.GetByUserIdAsync(userId) ?? throw new InvalidOperationException("User state not found");
 
+        // Check if daily spins need to be reset (more than a day has passed)
+        var today = DateTime.UtcNow.Date;
+        var lastReset = state.LastSlotSpinReset.Date;
+        if (lastReset < today)
+        {
+            state.ResetDailySpins(5); // Reset to 5 daily spins
+        }
+
         var totalSpins = state.DailySpinsRemaining + state.BonusSpins;
         if (totalSpins <= 0)
             throw new InvalidOperationException("No available spins");
@@ -39,9 +47,9 @@ public sealed class SlotMachineService
             state.BonusSpins--;
 
         // generate reels
-        var genre = GetRandomGenre();
-        var actor = GetRandomActor();
-        var director = GetRandomDirector();
+        var genre = await GetRandomGenreAsync();
+        var actor = await GetRandomActorAsync();
+        var director = await GetRandomDirectorAsync();
 
         // find matching events and jackpot
         var matchingEvents = await GetMatchingEventsAsync(genre.Id, actor.Id, director.Id);
@@ -73,6 +81,16 @@ public sealed class SlotMachineService
     public async Task<int> GetAvailableSpinsAsync(int userId)
     {
         var state = await _stateRepository.GetByUserIdAsync(userId) ?? throw new InvalidOperationException("User state not found");
+
+        // Check if daily spins need to be reset (more than a day has passed)
+        var today = DateTime.UtcNow.Date;
+        var lastReset = state.LastSlotSpinReset.Date;
+        if (lastReset < today)
+        {
+            state.ResetDailySpins(5); // Reset to 5 daily spins
+            await _stateRepository.UpdateAsync(state); // Persist the reset
+        }
+
         return state.DailySpinsRemaining + state.BonusSpins;
     }
 
@@ -103,22 +121,37 @@ public sealed class SlotMachineService
     }
 
     // Helpers: these use the movie and event repositories to select from active movies
-    public Genre GetRandomGenre()
+    public async Task<Genre> GetRandomGenreAsync(CancellationToken cancellationToken = default)
     {
-        var genres = _movieRepository.GetGenresAsync().GetAwaiter().GetResult();
+        var genres = await _movieRepository.GetGenresAsync(cancellationToken);
         return genres[_random.Next(genres.Count)];
     }
 
-    public Actor GetRandomActor()
+    public async Task<Actor> GetRandomActorAsync(CancellationToken cancellationToken = default)
     {
-        var actors = _movieRepository.GetActorsAsync().GetAwaiter().GetResult();
+        var actors = await _movieRepository.GetActorsAsync(cancellationToken);
         return actors[_random.Next(actors.Count)];
     }
 
-    public Director GetRandomDirector()
+    public async Task<Director> GetRandomDirectorAsync(CancellationToken cancellationToken = default)
     {
-        var directors = _movieRepository.GetDirectorsAsync().GetAwaiter().GetResult();
+        var directors = await _movieRepository.GetDirectorsAsync(cancellationToken);
         return directors[_random.Next(directors.Count)];
+    }
+
+    public async Task<IReadOnlyList<Genre>> GetGenresAsync(CancellationToken cancellationToken = default)
+    {
+        return await _movieRepository.GetGenresAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Actor>> GetActorsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _movieRepository.GetActorsAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Director>> GetDirectorsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _movieRepository.GetDirectorsAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<Event>> GetMatchingEventsAsync(int genreId, int actorId, int directorId)

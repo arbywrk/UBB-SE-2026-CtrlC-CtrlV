@@ -57,10 +57,10 @@ public sealed class SqlUserSlotMachineStateRepository : IUserSlotMachineStateRep
         command.Parameters.AddWithValue("@userId", state.UserId);
         command.Parameters.AddWithValue("@dailySpins", state.DailySpinsRemaining);
         command.Parameters.AddWithValue("@bonusSpins", state.BonusSpins);
-        command.Parameters.AddWithValue("@lastSlotReset", (object?)state.LastSlotSpinReset ?? DBNull.Value);
-        command.Parameters.AddWithValue("@lastTriviaReset", (object?)state.LastTriviaSpinReset ?? DBNull.Value);
+        command.Parameters.AddWithValue("@lastSlotReset", state.LastSlotSpinReset == default ? DBNull.Value : (object)state.LastSlotSpinReset);
+        command.Parameters.AddWithValue("@lastTriviaReset", state.LastTriviaSpinReset == default ? DBNull.Value : (object)state.LastTriviaSpinReset);
         command.Parameters.AddWithValue("@loginStreak", state.LoginStreak);
-        command.Parameters.AddWithValue("@lastLoginDate", (object?)state.LastLoginDate ?? DBNull.Value);
+        command.Parameters.AddWithValue("@lastLoginDate", state.LastLoginDate == default ? DBNull.Value : (object)state.LastLoginDate);
         command.Parameters.AddWithValue("@eventRewards", state.EventSpinRewardsToday);
 
         await command.ExecuteNonQueryAsync(cancellationToken);
@@ -76,10 +76,10 @@ public sealed class SqlUserSlotMachineStateRepository : IUserSlotMachineStateRep
         await using var command = new SqlCommand(sql, connection);
         command.Parameters.AddWithValue("@dailySpins", state.DailySpinsRemaining);
         command.Parameters.AddWithValue("@bonusSpins", state.BonusSpins);
-        command.Parameters.AddWithValue("@lastSlotReset", (object?)state.LastSlotSpinReset ?? DBNull.Value);
-        command.Parameters.AddWithValue("@lastTriviaReset", (object?)state.LastTriviaSpinReset ?? DBNull.Value);
+        command.Parameters.AddWithValue("@lastSlotReset", state.LastSlotSpinReset == default ? DBNull.Value : (object)state.LastSlotSpinReset);
+        command.Parameters.AddWithValue("@lastTriviaReset", state.LastTriviaSpinReset == default ? DBNull.Value : (object)state.LastTriviaSpinReset);
         command.Parameters.AddWithValue("@loginStreak", state.LoginStreak);
-        command.Parameters.AddWithValue("@lastLoginDate", (object?)state.LastLoginDate ?? DBNull.Value);
+        command.Parameters.AddWithValue("@lastLoginDate", state.LastLoginDate == default ? DBNull.Value : (object)state.LastLoginDate);
         command.Parameters.AddWithValue("@eventRewards", state.EventSpinRewardsToday);
         command.Parameters.AddWithValue("@userId", state.UserId);
 

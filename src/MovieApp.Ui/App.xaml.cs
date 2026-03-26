@@ -19,6 +19,13 @@ public partial class App : Application
     public static IEventRepository? EventRepository { get; private set; }
     public static ITriviaRepository? TriviaRepository { get; private set; }
     public static IAmbassadorRepository? AmbassadorRepository { get; private set; }
+    public static IMovieRepository? MovieRepository { get; private set; }
+    public static IUserSlotMachineStateRepository? SlotMachineStateRepository { get; private set; }
+    public static IUserMovieDiscountRepository? UserMovieDiscountRepository { get; private set; }
+    public static IScreeningRepository? ScreeningRepository { get; private set; }
+    public static SlotMachineService? SlotMachineService { get; private set; }
+    public static SlotMachineResultService? SlotMachineResultService { get; private set; }
+    public static ReelAnimationService? ReelAnimationService { get; private set; }
     public static MovieApp.Core.Services.IReferralValidator? ReferralValidator { get; private set; }
     public static MainWindow? CurrentMainWindow { get; private set; }
 
@@ -53,14 +60,34 @@ public partial class App : Application
             var eventRepository = new SqlEventRepository(databaseOptions);
             var triviaRepository = new SqlTriviaRepository(databaseOptions);
             var ambassadorRepository = new SqlAmbassadorRepository(databaseOptions);
+            var movieRepository = new SqlMovieRepository(databaseOptions);
+            var slotMachineStateRepository = new SqlUserSlotMachineStateRepository(databaseOptions);
+            var userMovieDiscountRepository = new SqlUserRewardRepository(databaseOptions);
+            var screeningRepository = new SqlScreeningRepository(databaseOptions);
 
             _currentUserService = new CurrentUserService(userRepository, bootstrapUserOptions);
             await _currentUserService.InitializeAsync();
             CurrentUserService = _currentUserService;
 
+            var slotMachineService = new SlotMachineService(
+                slotMachineStateRepository,
+                movieRepository,
+                eventRepository,
+                userMovieDiscountRepository);
+
+            var slotMachineResultService = new SlotMachineResultService(userMovieDiscountRepository);
+            var reelAnimationService = new ReelAnimationService();
+
             EventRepository = eventRepository;
             TriviaRepository = triviaRepository;
             AmbassadorRepository = ambassadorRepository;
+            MovieRepository = movieRepository;
+            SlotMachineStateRepository = slotMachineStateRepository;
+            UserMovieDiscountRepository = userMovieDiscountRepository;
+            ScreeningRepository = screeningRepository;
+            SlotMachineService = slotMachineService;
+            SlotMachineResultService = slotMachineResultService;
+            ReelAnimationService = reelAnimationService;
             ReferralValidator = new MovieApp.Core.Services.ReferralValidator(ambassadorRepository);
 
             viewModel = new MainViewModel(_currentUserService.CurrentUser);
