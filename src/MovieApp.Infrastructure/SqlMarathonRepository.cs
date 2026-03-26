@@ -48,10 +48,8 @@ public sealed class SqlMarathonRepository : IMarathonRepository
     {
         var rankings = new List<MarathonProgress>();
         await using var connection = new SqlConnection(_connectionString);
-        await using var command = new SqlCommand(
-            "SELECT UserId, MarathonId, TriviaAccuracy, CompletedMoviesCount, FinishedAt " +
-            "FROM dbo.MarathonProgress WHERE MarathonId = @MarathonId " +
-            "ORDER BY TriviaAccuracy DESC, FinishedAt ASC", connection);
+        const string sql = "SELECT UserId, MarathonId, TriviaAccuracy, CompletedMoviesCount, FinishedAt FROM dbo.MarathonProgress WHERE MarathonId = @MarathonIdORDER BY CompletedMoviesCount DESC,TriviaAccuracy DESC,FinishedAt ASC;";
+        await using var command = new SqlCommand(sql, connection);
 
         command.Parameters.AddWithValue("@MarathonId", marathonId);
 
