@@ -11,6 +11,7 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -20,8 +21,7 @@
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" /> </Grid.ColumnDefinitions>
 
                 <StackPanel Spacing="2">
                     <TextBlock
@@ -50,9 +50,18 @@
             </Grid>
         </Border>
 
+        <controls:InfoBar
+            x:Name="PriceAlertInfoBar"
+            Grid.Row="1"
+            Margin="16,12,16,0"
+            IsOpen="False"
+            Severity="Success"
+            Title="Price Drop Alert!"
+            IsClosable="True" />
+
         <controls:NavigationView
             x:Name="AppNavigationView"
-            Grid.Row="1"
+            Grid.Row="2"
             Margin="0,12,0,0"
             IsBackButtonVisible="Collapsed"
             IsSettingsVisible="False"
