@@ -72,5 +72,19 @@ public sealed partial class EventManagementPage : Page
                 await notifService.GenerateSeatsAvailableNotificationAsync(firstEvent.Id, firstEvent.Title);
             }
         }
+    /// <summary>
+    /// Applies the shared event search behavior to the event-management list state.
+    /// </summary>
+    private void SearchBox_SearchTextChanged(object? sender, string searchText)
+    {
+        ViewModel.SetSearchText(searchText);
+    }
+
+    /// <summary>
+    /// Applies the shared event sort behavior to the event-management list state.
+    /// </summary>
+    private void SortSelector_SortOptionChanged(object? sender, MovieApp.Core.EventLists.EventSortOption sortOption)
+    {
+        ViewModel.SetSortOption(sortOption);
     }
 }

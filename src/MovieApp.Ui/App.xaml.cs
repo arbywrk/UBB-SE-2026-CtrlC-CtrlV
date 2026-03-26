@@ -9,26 +9,37 @@ using MovieApp.Ui.Views;
 
 namespace MovieApp.Ui;
 
+/// <summary>
+/// WinUI application entry point responsible for configuration loading,
+/// shared dependency construction, and main-window startup.
+/// </summary>
 public partial class App : Application
 {
     private Window? _window;
     private ICurrentUserService? _currentUserService;
 
     public static ICurrentUserService? CurrentUserService { get; private set; }
-
     public static IEventRepository? EventRepository { get; private set; }
     public static ITriviaRepository? TriviaRepository { get; private set; }
+    public static ITriviaRewardRepository? TriviaRewardRepository { get; private set; }
     public static IAmbassadorRepository? AmbassadorRepository { get; private set; }
-    public static MovieApp.Core.Services.IReferralValidator? ReferralValidator { get; private set; }
+    public static IReferralValidator? ReferralValidator { get; private set; }
     public static MainWindow? CurrentMainWindow { get; private set; }
-<<<<<<< Updated upstream
-=======
     public static IConfigurationRoot? Configuration { get; private set; }
     public static IMarathonRepository? MarathonRepository { get; private set; }
     
->>>>>>> Stashed changes
     public static IFavoriteEventService? FavoriteEventService { get; private set; }
     public static INotificationService? NotificationService { get; private set; }
+    public static int CurrentUserId { get; private set; }
+    public static IMovieRepository? MovieRepository { get; private set; }
+    public static IUserSlotMachineStateRepository? SlotMachineStateRepository { get; private set; }
+    public static IUserMovieDiscountRepository? UserMovieDiscountRepository { get; private set; }
+    public static IScreeningRepository? ScreeningRepository { get; private set; }
+    public static SlotMachineService? SlotMachineService { get; private set; }
+    public static SlotMachineResultService? SlotMachineResultService { get; private set; }
+    public static ReelAnimationService? ReelAnimationService { get; private set; }
+    public static IConfigurationRoot? Configuration { get; private set; }
+    public static IMarathonRepository? MarathonRepository { get; private set; }
 
     public App()
     {
@@ -40,16 +51,13 @@ public partial class App : Application
         MainViewModel viewModel;
         EventRepository = UnavailableEventRepository.Instance;
         TriviaRepository = null;
+        TriviaRewardRepository = null;
+        CurrentUserId = 0;
 
         try
         {
             var configuration = BuildConfiguration();
-<<<<<<< Updated upstream
-=======
             Configuration = configuration;
-            var connectionString = configuration["Database:ConnectionString"];
-            
->>>>>>> Stashed changes
             var databaseOptions = new DatabaseOptions
             {
                 ConnectionString = connectionString
@@ -66,16 +74,32 @@ public partial class App : Application
             var userRepository = new SqlUserRepository(databaseOptions);
             var eventRepository = new SqlEventRepository(databaseOptions);
             var triviaRepository = new SqlTriviaRepository(databaseOptions);
+            var triviaRewardRepository = new SqlTriviaRewardRepository(databaseOptions);
             var ambassadorRepository = new SqlAmbassadorRepository(databaseOptions);
             var favoriteEventRepository = new SqlFavoriteEventRepository(databaseOptions);
             var notificationRepository = new SqlNotificationRepository(databaseOptions);
+            var movieRepository = new SqlMovieRepository(databaseOptions);
+            var slotMachineStateRepository = new SqlUserSlotMachineStateRepository(databaseOptions);
+            var userMovieDiscountRepository = new SqlUserRewardRepository(databaseOptions);
+            var screeningRepository = new SqlScreeningRepository(databaseOptions);
+            var marathonRepository = new SqlMarathonRepository(databaseOptions);
 
             _currentUserService = new CurrentUserService(userRepository, bootstrapUserOptions);
             await _currentUserService.InitializeAsync();
             CurrentUserService = _currentUserService;
 
+            var slotMachineService = new SlotMachineService(
+                slotMachineStateRepository,
+                movieRepository,
+                eventRepository,
+                userMovieDiscountRepository);
+
+            var slotMachineResultService = new SlotMachineResultService(userMovieDiscountRepository);
+            var reelAnimationService = new ReelAnimationService();
+
             EventRepository = eventRepository;
             TriviaRepository = triviaRepository;
+            TriviaRewardRepository = triviaRewardRepository;
             AmbassadorRepository = ambassadorRepository;
             ReferralValidator = new MovieApp.Core.Services.ReferralValidator(ambassadorRepository);
             
@@ -87,24 +111,21 @@ public partial class App : Application
 
             FavoriteEventService = new FavoriteEventService(favoriteEventRepository, eventRepository);
             NotificationService = new NotificationService(notificationRepository, favoriteEventRepository, eventRepository);
+            ReferralValidator = new ReferralValidator(ambassadorRepository);
+            CurrentUserId = _currentUserService.CurrentUser.Id;
+            MovieRepository = movieRepository;
+            SlotMachineStateRepository = slotMachineStateRepository;
+            UserMovieDiscountRepository = userMovieDiscountRepository;
+            ScreeningRepository = screeningRepository;
+            SlotMachineService = slotMachineService;
+            SlotMachineResultService = slotMachineResultService;
+            ReelAnimationService = reelAnimationService;
+            MarathonRepository = marathonRepository;
 
             viewModel = new MainViewModel(_currentUserService.CurrentUser);
         }
         catch (Exception)
         {
-<<<<<<< Updated upstream
-            // Fully functional offline fallback for testing without LocalDB
-            EventRepository = UnavailableEventRepository.Instance;
-            var fakeFavs = new MovieApp.Ui.Services.UnavailableFavoriteEventRepository();
-            var fakeNotifs = new MovieApp.Ui.Services.UnavailableNotificationRepository();
-            FavoriteEventService = new FavoriteEventService(fakeFavs, EventRepository);
-            NotificationService = new NotificationService(fakeNotifs, fakeFavs);
-            
-            var fakeUserSvc = new MovieApp.Ui.Services.FakeCurrentUserService();
-            CurrentUserService = fakeUserSvc;
-
-            viewModel = new MainViewModel(fakeUserSvc.CurrentUser!);
-=======
             // If LocalDB is not found, we still want to show the app in DEMO MODE as requested.
             if (exception.Message.Contains("Local Database Runtime") || exception.InnerException?.Message.Contains("Local Database Runtime") == true)
             {
@@ -123,7 +144,6 @@ public partial class App : Application
             {
                 viewModel = MainViewModel.CreateStartupError(BuildStartupErrorMessage(exception));
             }
->>>>>>> Stashed changes
         }
 
         CurrentMainWindow = new MainWindow(viewModel);

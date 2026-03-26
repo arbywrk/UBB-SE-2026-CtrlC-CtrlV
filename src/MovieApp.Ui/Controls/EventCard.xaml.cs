@@ -140,6 +140,26 @@ public sealed partial class EventCard : UserControl
             card.RefreshComputedProperties();
         }
     }
+    
+    private async void VisualSeatGuide_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        try
+        {
+            int capacity = EventModel?.MaxCapacity ?? 50;
+
+            var dialog = new SeatGuideDialog(capacity)
+            {
+                XamlRoot = this.XamlRoot 
+            };
+
+            await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Eroare la deschiderea dialogului: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+        }
+    }
 
 <<<<<<< Updated upstream
     private async void RefreshComputedProperties()

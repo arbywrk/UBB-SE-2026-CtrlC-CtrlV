@@ -4,6 +4,13 @@ using MovieApp.Core.Services;
 
 namespace MovieApp.Ui.ViewModels.Events;
 
+/// <summary>
+/// Represents the event-management workspace used for organizer-facing CRUD flows.
+/// </summary>
+/// <remarks>
+/// The current implementation exposes the shared event-list behavior, but the
+/// management data source has not been connected yet.
+/// </remarks>
 public sealed class EventManagementViewModel : EventListPageViewModel
 {
     public override string PageTitle => "Event Management";
@@ -14,6 +21,10 @@ public sealed class EventManagementViewModel : EventListPageViewModel
     public System.Windows.Input.ICommand SimulateUpdateCommand { get; }
 
     public EventManagementViewModel()
+    /// <summary>
+    /// Loads the management event list.
+    /// </summary>
+    protected override Task<IReadOnlyList<Event>> LoadEventsAsync()
     {
         _eventRepository = App.EventRepository;
         _notificationService = App.NotificationService;

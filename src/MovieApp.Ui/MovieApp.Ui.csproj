@@ -26,6 +26,8 @@
     <None Remove="Views\SlotMachinePage.xaml" />
     <None Remove="Views\TriviaWheelPage.xaml" />
     <None Remove="Controls\EventCard.xaml" />
+    <None Remove="Controls\EventSearchBox.xaml" />
+    <None Remove="Controls\EventSortSelector.xaml" />
     <None Remove="Controls\SectionHeader.xaml" />
 	<None Remove="Views\SectionEventsPage.xaml" />
   </ItemGroup>
@@ -61,6 +63,12 @@
 
   <ItemGroup>
     <Page Update="Controls\EventCard.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Controls\EventSearchBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Controls\EventSortSelector.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Update="Controls\SectionHeader.xaml">

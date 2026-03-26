@@ -133,6 +133,34 @@ public sealed class HomeEventsViewModelTests
     }
 
     [Fact]
+    public async Task SetSearchText_MatchesSectionsByEventType()
+    {
+        var repository = new StubEventRepository(BuildSectionSampleEvents());
+        var viewModel = new HomeEventsViewModel(repository);
+
+        await viewModel.InitializeAsync();
+        viewModel.SetSearchText("festival");
+
+        var section = Assert.Single(viewModel.Sections);
+        Assert.Equal("Festival", section.Title);
+        Assert.Equal([3], section.Events.Select(e => e.Id));
+    }
+
+    [Fact]
+    public async Task SetSortOption_PreservesSharedSortOrderInsideHomeSections()
+    {
+        var repository = new StubEventRepository(BuildSectionSampleEvents());
+        var viewModel = new HomeEventsViewModel(repository);
+
+        await viewModel.InitializeAsync();
+        viewModel.SetSortOption(MovieApp.Core.EventLists.EventSortOption.HistoricalRatingDescending);
+
+        Assert.Equal(["Festival", "Premiere"], viewModel.Sections.Select(s => s.Title));
+        Assert.Equal([3], viewModel.Sections[0].Events.Select(e => e.Id));
+        Assert.Equal([1, 2], viewModel.Sections[1].Events.Select(e => e.Id));
+    }
+
+    [Fact]
     public async Task CreateNavigationContext_ReturnsSelectedGroupingInformation()
     {
         var repository = new StubEventRepository(BuildSectionSampleEvents());

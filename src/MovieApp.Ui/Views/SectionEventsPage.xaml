@@ -22,6 +22,15 @@
                 Opacity="0.7"
                 Text="All events in this section" />
 
+            <ui:EventSearchBox
+                PlaceholderText="Search this section by title or type"
+                SearchTextChanged="SearchBox_SearchTextChanged" />
+
+            <ui:EventSortSelector
+                PlaceholderText="Sort this section"
+                SelectedSortOption="{Binding EventListState.SelectedSortOption, Mode=OneWay}"
+                SortOptionChanged="SortSelector_SortOptionChanged" />
+
             <ItemsControl ItemsSource="{Binding VisibleEvents}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

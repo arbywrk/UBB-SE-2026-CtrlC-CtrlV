@@ -66,24 +66,48 @@ public sealed partial class TriviaWheelPage : Page
         Loaded += OnPageLoaded;
     }
 
-    private void OnPageLoaded(object sender, RoutedEventArgs e)
+    private async void OnPageLoaded(object sender, RoutedEventArgs e)
     {
-        if (App.TriviaRepository is not null)
+        if (App.TriviaRepository is not null
+            && App.TriviaRewardRepository is not null
+            && App.SlotMachineStateRepository is not null)
         {
-            _viewModel = new TriviaWheelViewModel(App.TriviaRepository);
+            _viewModel = new TriviaWheelViewModel(
+                App.TriviaRepository,
+                App.TriviaRewardRepository,
+                App.SlotMachineStateRepository,
+                App.CurrentUserId);
+
+            await _viewModel.InitializeAsync();
+        }
+        else
+        {
+            TriviaAvailabilityText.Text = "Trivia unavailable: no database connection.";
+            TriviaAvailabilityText.Visibility = Visibility.Visible;
         }
 
         if (_viewModel?.CanSpin == false)
         {
-            RemainingSpinsText.Visibility = Visibility.Collapsed;
-            StartCountdown();
+            if (_viewModel.IsTriviaAvailable)
+            {
+                RemainingSpinsText.Visibility = Visibility.Collapsed;
+                StartCountdown();
+            }
+            else
+            {
+                TriviaAvailabilityText.Text = _viewModel.AvailabilityMessage;
+                TriviaAvailabilityText.Visibility = Visibility.Visible;
+            }
         }
         else
         {
             RemainingSpinsText.Text = _viewModel?.RemainingSpinsText ?? "Loading...";
+            TriviaAvailabilityText.Visibility = Visibility.Collapsed;
         }
 
-        SpinButton.IsEnabled = _viewModel?.CanSpin ?? false;
+        SpinButton.IsEnabled = _viewModel is not null
+            && _viewModel.CanSpin
+            && _viewModel.IsTriviaAvailable;
         DrawWheel();
     }
 
@@ -107,13 +131,13 @@ public sealed partial class TriviaWheelPage : Page
             };
             WheelCanvas.Children.Add(path);
 
-            // Label centered on segment midpoint at 60% radius
+            
             double midAngleRad = (startAngle + angleStep / 2.0) * Math.PI / 180.0;
             double labelRadius = radius * 0.60;
             double lx = cx + labelRadius * Math.Cos(midAngleRad) - 44;
             double ly = cy + labelRadius * Math.Sin(midAngleRad) - 14;
 
-            // Shortened names so they fit inside the segment
+            
             string shortName = _categories[i] switch
             {
                 "Oscars and Awards" => "Oscars &\nAwards",
@@ -180,14 +204,13 @@ public sealed partial class TriviaWheelPage : Page
 
         SpinButton.IsEnabled = false;
 
-        var random = new Random();
+        
+        _ = _viewModel.RecordSpinAsync();
 
-        // Spin 3 full rotations plus a random extra angle
+        var random = new Random();
         double extraAngle = random.NextDouble() * 360.0;
         double totalRotation = 360.0 * 3 + extraAngle;
 
-        // Figure out which segment the arrow (at top = 270°) points to after rotation
-        // The wheel rotates clockwise, so we subtract from 270° to find where arrow lands
         double finalAngle = totalRotation % 360.0;
         double arrowPointsAt = (270.0 - finalAngle + 360.0) % 360.0;
         double segmentAngle = 360.0 / _categories.Length;
@@ -209,7 +232,6 @@ public sealed partial class TriviaWheelPage : Page
         storyboard.Completed += (s, ev) =>
         {
             SelectedCategoryText.Text = _categories[categoryIndex];
-         
             ShowPlayingPanel();
             _ = LoadQuestionsAsync(_categories[categoryIndex]);
         };
@@ -221,6 +243,13 @@ public sealed partial class TriviaWheelPage : Page
     {
         if (_viewModel is null) return;
         await _viewModel.LoadQuestionsAsync(category);
+
+        if (_viewModel.NoQuestionsAvailable)
+        {
+            ShowNoQuestionsState();
+            return;
+        }
+
         ShowCurrentQuestion();
     }
 
@@ -297,15 +326,40 @@ public sealed partial class TriviaWheelPage : Page
         PlayingPanel.Visibility = Visibility.Visible;
     }
 
+    /// <summary>
+    /// Returns the page to the idle layout with a message explaining that the category has no questions.
+    /// </summary>
+    private void ShowNoQuestionsState()
+    {
+        IdlePanel.Visibility = Visibility.Visible;
+        ResultsPanel.Visibility = Visibility.Collapsed;
+        PlayingPanel.Visibility = Visibility.Collapsed;
+
+        IdleTitleText.Text = "No trivia available";
+        IdleDescriptionText.Text = _viewModel?.EmptyStateMessage
+            ?? "No trivia questions are available for this category yet.";
+    }
+
     private void ShowResults()
     {
         PlayingPanel.Visibility = Visibility.Collapsed;
         ResultsPanel.Visibility = Visibility.Visible;
 
-        ResultsTitleText.Text = _viewModel!.HasEarnedReward ? "🎉 You won!" : "Session Complete";
-        ResultsScoreText.Text = $"You answered {_viewModel.Score}/20 correctly.";
-        ResultsRewardText.Text = _viewModel.HasEarnedReward
-            ? "A free movie ticket reward has been added to your account!"
-            : "Answer all 20 correctly next time to earn a reward.";
+        if (_viewModel!.HasEarnedReward)
+        {
+            ResultsTitleText.Text = "🎉 Perfect Score!";
+            ResultsTitleText.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 200, 0)); // gold
+            ResultsScoreText.Text = $"{_viewModel.Score}";
+            ResultsScoreText.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 200, 0)); // gold
+            ResultsRewardText.Text = "A free movie ticket reward has been added to your account!";
+        }
+        else
+        {
+            ResultsTitleText.Text = "Session Complete";
+            ResultsTitleText.Foreground = new SolidColorBrush(Color.FromArgb(255, 200, 200, 200)); // neutral
+            ResultsScoreText.Text = $"{_viewModel.Score}";
+            ResultsScoreText.Foreground = new SolidColorBrush(Color.FromArgb(255, 200, 200, 200)); // neutral
+            ResultsRewardText.Text = "Answer all 20 correctly next time to earn a reward.";
+        }
     }
 }
