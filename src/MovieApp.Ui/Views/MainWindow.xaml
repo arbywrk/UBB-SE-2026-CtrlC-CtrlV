@@ -21,7 +21,8 @@
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" /> </Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
                 <StackPanel Spacing="2">
                     <TextBlock

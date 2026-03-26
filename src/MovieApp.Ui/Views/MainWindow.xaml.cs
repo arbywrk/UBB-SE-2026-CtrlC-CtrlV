@@ -66,7 +66,7 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine(ex.Message);
+            System.Diagnostics.Debug.WriteLine($"Error on startup check: {ex.Message}");
         }
     }
 
