@@ -28,7 +28,11 @@ public sealed partial class MarathonsPage : Page
 
         ViewModel = new MarathonPageViewModel(marathonService, marathonRepo);
         InitializeComponent();
-        Loaded += async (_, _) => await ViewModel.LoadAsync();
+        Loaded += async (_, _) =>
+        {
+            var userId = App.CurrentUserService?.CurrentUser.Id ?? 0;
+            await ViewModel.LoadAsync(userId);
+        };
     }
 
     // Called when the user selects a marathon from the left list
