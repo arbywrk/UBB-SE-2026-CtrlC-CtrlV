@@ -213,6 +213,9 @@ public sealed class TriviaWheelViewModel : ViewModelBase
         AdvanceToNextQuestion();
     }
 
+    /// <summary>
+    /// Evaluates the selected answer, updates the score, and advances the session.
+    /// </summary>
     public void SubmitAnswer(char selectedOption)
     {
         if (CurrentQuestion is null) return;
@@ -238,6 +241,9 @@ public sealed class TriviaWheelViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Marks the one-time hint as consumed for the current session.
+    /// </summary>
     public void UseHint()
     {
         HintUsed = true;

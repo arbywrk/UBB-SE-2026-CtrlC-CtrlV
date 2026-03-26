@@ -9,6 +9,10 @@ using MovieApp.Ui.Views;
 
 namespace MovieApp.Ui;
 
+/// <summary>
+/// WinUI application entry point responsible for configuration loading,
+/// shared dependency construction, and main-window startup.
+/// </summary>
 public partial class App : Application
 {
     private Window? _window;
