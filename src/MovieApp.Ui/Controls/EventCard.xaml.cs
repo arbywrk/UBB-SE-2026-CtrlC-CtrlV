@@ -10,6 +10,9 @@ using Windows.UI;
 
 namespace MovieApp.Ui.Controls;
 
+/// <summary>
+/// Displays a compact event summary card with favorite toggling and seat-guide access.
+/// </summary>
 public sealed partial class EventCard : UserControl
 {
     public static readonly DependencyProperty ModelProperty = DependencyProperty.Register(
@@ -32,25 +35,15 @@ public sealed partial class EventCard : UserControl
     private Event? EventModel => Model as Event;
 
     public string TitleText => GetTitleText(EventModel);
-
     public string DescriptionText => GetDescriptionText(EventModel);
-
     public string EventTypeText => GetEventTypeText(EventModel);
-
     public string DateBadgeDay => GetDateBadgeDay(EventModel, CultureInfo.CurrentCulture);
-
     public string ScheduleText => GetScheduleText(EventModel, CultureInfo.CurrentCulture);
-
     public string LocationText => GetLocationText(EventModel);
-
     public string PriceText => GetPriceText(EventModel, CultureInfo.CurrentCulture);
-
     public string RatingText => GetRatingText(EventModel);
-
     public string CapacityText => GetCapacityText(EventModel);
-
     public string StatusText => GetStatusText(EventModel, DateTime.Now);
-
     public Brush StatusBackgroundBrush => new SolidColorBrush(GetStatusColor(EventModel, DateTime.Now));
 
     internal static string GetTitleText(Event? @event) => @event?.Title ?? "Untitled event";
@@ -140,101 +133,86 @@ public sealed partial class EventCard : UserControl
             card.RefreshComputedProperties();
         }
     }
-    
-    private async void VisualSeatGuide_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+
+    private async void VisualSeatGuide_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            int capacity = EventModel?.MaxCapacity ?? 50;
-
+            var capacity = EventModel?.MaxCapacity ?? 50;
             var dialog = new SeatGuideDialog(capacity)
             {
-                XamlRoot = this.XamlRoot 
+                XamlRoot = XamlRoot,
             };
 
             await dialog.ShowAsync();
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Eroare la deschiderea dialogului: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Error opening seat guide: {ex.Message}");
             System.Diagnostics.Debug.WriteLine(ex.StackTrace);
         }
     }
 
-<<<<<<< Updated upstream
     private async void RefreshComputedProperties()
-=======
-        var dialog = new SeatGuideDialog(capacity)
-        {
-            XamlRoot = this.XamlRoot 
-        };
-
-        await dialog.ShowAsync();
-    }
-
-    private async void Favorite_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        if (EventModel is null) return;
-
-        var favoriteService = App.FavoriteEventService;
-        var currentUserService = App.CurrentUserService;
-
-        if (favoriteService is not null && currentUserService?.CurrentUser is not null)
-        {
-            await favoriteService.AddFavoriteAsync(currentUserService.CurrentUser.Id, EventModel.Id);
-            
-            // Show a simple success feedback (can use a dialog or just silently succeed)
-        }
-    }
-
-    private void RefreshComputedProperties()
->>>>>>> Stashed changes
     {
         Bindings.Update();
         await UpdateFavoriteIconAsync();
     }
 
-    private async System.Threading.Tasks.Task UpdateFavoriteIconAsync()
+    private async Task UpdateFavoriteIconAsync()
     {
-        if (EventModel is null || App.FavoriteEventService is null || App.CurrentUserService?.CurrentUser is null) return;
-        
+        if (EventModel is null || App.FavoriteEventService is null || App.CurrentUserService?.CurrentUser is null)
+        {
+            return;
+        }
+
         try
         {
-            bool isFav = await App.FavoriteEventService.ExistsFavoriteAsync(App.CurrentUserService.CurrentUser.Id, EventModel.Id);
-            UpdateIconVisuals(isFav);
+            var isFavorite = await App.FavoriteEventService.ExistsFavoriteAsync(App.CurrentUserService.CurrentUser.Id, EventModel.Id);
+            UpdateIconVisuals(isFavorite);
         }
-        catch { }
+        catch
+        {
+        }
     }
 
     private void UpdateIconVisuals(bool isFavorite)
     {
-        if (FavoriteIcon == null) return;
-        
+        if (FavoriteIcon is null)
+        {
+            return;
+        }
+
         if (isFavorite)
         {
-            FavoriteIcon.Glyph = "\uEB52"; // Solid heart
-            FavoriteIcon.Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 239, 68, 68)); // Red color
+            FavoriteIcon.Glyph = "\uEB52";
+            FavoriteIcon.Foreground = new SolidColorBrush(Color.FromArgb(255, 239, 68, 68));
         }
         else
         {
-            FavoriteIcon.Glyph = "\uEB51"; // Outline heart
-            FavoriteIcon.ClearValue(FontIcon.ForegroundProperty); // Reset color
+            FavoriteIcon.Glyph = "\uEB51";
+            FavoriteIcon.ClearValue(FontIcon.ForegroundProperty);
         }
     }
 
     private async void ToggleFavorite_Click(object sender, RoutedEventArgs e)
     {
-        if (EventModel is null) return;
-        
+        if (EventModel is null)
+        {
+            return;
+        }
+
         var favoriteService = App.FavoriteEventService;
         var currentUser = App.CurrentUserService?.CurrentUser;
-        
-        if (favoriteService == null || currentUser == null) return;
-        
+        if (favoriteService is null || currentUser is null)
+        {
+            return;
+        }
+
         try
         {
-            bool isFav = await favoriteService.ExistsFavoriteAsync(currentUser.Id, EventModel.Id);
-            if (isFav)
+            var isFavorite = await favoriteService.ExistsFavoriteAsync(currentUser.Id, EventModel.Id);
+            if (isFavorite)
             {
                 await favoriteService.RemoveFavoriteAsync(currentUser.Id, EventModel.Id);
                 UpdateIconVisuals(false);
@@ -245,6 +223,8 @@ public sealed partial class EventCard : UserControl
                 UpdateIconVisuals(true);
             }
         }
-        catch { }
+        catch
+        {
+        }
     }
 }

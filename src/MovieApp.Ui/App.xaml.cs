@@ -1,8 +1,8 @@
-using Microsoft.UI.Xaml;
 using Microsoft.Extensions.Configuration;
+using Microsoft.UI.Xaml;
 using MovieApp.Core.Repositories;
-using MovieApp.Infrastructure;
 using MovieApp.Core.Services;
+using MovieApp.Infrastructure;
 using MovieApp.Ui.Services;
 using MovieApp.Ui.ViewModels;
 using MovieApp.Ui.Views;
@@ -27,7 +27,6 @@ public partial class App : Application
     public static MainWindow? CurrentMainWindow { get; private set; }
     public static IConfigurationRoot? Configuration { get; private set; }
     public static IMarathonRepository? MarathonRepository { get; private set; }
-    
     public static IFavoriteEventService? FavoriteEventService { get; private set; }
     public static INotificationService? NotificationService { get; private set; }
     public static int CurrentUserId { get; private set; }
@@ -38,14 +37,13 @@ public partial class App : Application
     public static SlotMachineService? SlotMachineService { get; private set; }
     public static SlotMachineResultService? SlotMachineResultService { get; private set; }
     public static ReelAnimationService? ReelAnimationService { get; private set; }
-    public static IConfigurationRoot? Configuration { get; private set; }
-    public static IMarathonRepository? MarathonRepository { get; private set; }
 
     public App()
     {
         InitializeComponent();
     }
 
+    /// <inheritdoc />
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         MainViewModel viewModel;
@@ -58,6 +56,8 @@ public partial class App : Application
         {
             var configuration = BuildConfiguration();
             Configuration = configuration;
+
+            var connectionString = configuration["Database:ConnectionString"];
             var databaseOptions = new DatabaseOptions
             {
                 ConnectionString = connectionString
@@ -86,57 +86,53 @@ public partial class App : Application
 
             _currentUserService = new CurrentUserService(userRepository, bootstrapUserOptions);
             await _currentUserService.InitializeAsync();
+
             CurrentUserService = _currentUserService;
-
-            var slotMachineService = new SlotMachineService(
-                slotMachineStateRepository,
-                movieRepository,
-                eventRepository,
-                userMovieDiscountRepository);
-
-            var slotMachineResultService = new SlotMachineResultService(userMovieDiscountRepository);
-            var reelAnimationService = new ReelAnimationService();
-
             EventRepository = eventRepository;
             TriviaRepository = triviaRepository;
             TriviaRewardRepository = triviaRewardRepository;
             AmbassadorRepository = ambassadorRepository;
-            ReferralValidator = new MovieApp.Core.Services.ReferralValidator(ambassadorRepository);
-            
-            FavoriteEventService = new FavoriteEventService(favoriteEventRepository, eventRepository);
-            NotificationService = new NotificationService(notificationRepository, favoriteEventRepository);
-
-            var favoriteEventRepository = new SqlFavoriteEventRepository(databaseOptions);
-            var notificationRepository = new SqlNotificationRepository(databaseOptions);
-
+            ReferralValidator = new ReferralValidator(ambassadorRepository);
             FavoriteEventService = new FavoriteEventService(favoriteEventRepository, eventRepository);
             NotificationService = new NotificationService(notificationRepository, favoriteEventRepository, eventRepository);
-            ReferralValidator = new ReferralValidator(ambassadorRepository);
             CurrentUserId = _currentUserService.CurrentUser.Id;
             MovieRepository = movieRepository;
             SlotMachineStateRepository = slotMachineStateRepository;
             UserMovieDiscountRepository = userMovieDiscountRepository;
             ScreeningRepository = screeningRepository;
-            SlotMachineService = slotMachineService;
-            SlotMachineResultService = slotMachineResultService;
-            ReelAnimationService = reelAnimationService;
             MarathonRepository = marathonRepository;
+
+            SlotMachineService = new SlotMachineService(
+                slotMachineStateRepository,
+                movieRepository,
+                eventRepository,
+                userMovieDiscountRepository);
+            SlotMachineResultService = new SlotMachineResultService(userMovieDiscountRepository);
+            ReelAnimationService = new ReelAnimationService();
 
             viewModel = new MainViewModel(_currentUserService.CurrentUser);
         }
-        catch (Exception)
+        catch (Exception exception)
         {
-            // If LocalDB is not found, we still want to show the app in DEMO MODE as requested.
-            if (exception.Message.Contains("Local Database Runtime") || exception.InnerException?.Message.Contains("Local Database Runtime") == true)
+            if (exception.Message.Contains("Local Database Runtime", StringComparison.OrdinalIgnoreCase)
+                || exception.InnerException?.Message.Contains("Local Database Runtime", StringComparison.OrdinalIgnoreCase) == true)
             {
                 var dummyUserRepo = new DummyUserRepository();
-                _currentUserService = new CurrentUserService(dummyUserRepo, new BootstrapUserOptions { AuthProvider = "dummy", AuthSubject = "default-user" });
-                _currentUserService.InitializeAsync().Wait();
-                CurrentUserService = _currentUserService;
+                _currentUserService = new CurrentUserService(
+                    dummyUserRepo,
+                    new BootstrapUserOptions
+                    {
+                        AuthProvider = "dummy",
+                        AuthSubject = "default-user",
+                    });
+                await _currentUserService.InitializeAsync();
 
                 var favoriteRepo = new InMemoryFavoriteEventRepository();
+                CurrentUserService = _currentUserService;
+                EventRepository = UnavailableEventRepository.Instance;
                 FavoriteEventService = new FavoriteEventService(favoriteRepo, UnavailableEventRepository.Instance);
                 NotificationService = new NotificationService(new InMemoryNotificationRepository(), favoriteRepo, UnavailableEventRepository.Instance);
+                CurrentUserId = _currentUserService.CurrentUser.Id;
 
                 viewModel = new MainViewModel(_currentUserService.CurrentUser);
             }

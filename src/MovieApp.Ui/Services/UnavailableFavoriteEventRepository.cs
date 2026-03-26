@@ -32,6 +32,11 @@ public class UnavailableFavoriteEventRepository : IFavoriteEventRepository
         return Task.FromResult<IReadOnlyList<int>>(_items.Where(f => f.EventId == eventId).Select(f => f.UserId).ToList());
     }
 
+    public Task<IReadOnlyList<FavoriteEvent>> FindByEventAsync(int eventId, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult<IReadOnlyList<FavoriteEvent>>(_items.Where(f => f.EventId == eventId).ToList());
+    }
+
     public Task RemoveAsync(int userId, int eventId, CancellationToken cancellationToken = default)
     {
         var item = _items.FirstOrDefault(f => f.UserId == userId && f.EventId == eventId);

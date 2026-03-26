@@ -17,6 +17,16 @@ public sealed class InMemoryFavoriteEventRepository : IFavoriteEventRepository
         return Task.FromResult((IReadOnlyList<FavoriteEvent>)_favorites.Where(f => f.EventId == eventId).ToList());
     }
 
+    public Task<bool> ExistsAsync(int userId, int eventId, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(_favorites.Any(favorite => favorite.UserId == userId && favorite.EventId == eventId));
+    }
+
+    public Task<IReadOnlyList<int>> GetUsersByFavoriteEventAsync(int eventId, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult((IReadOnlyList<int>)_favorites.Where(favorite => favorite.EventId == eventId).Select(favorite => favorite.UserId).ToList());
+    }
+
     public Task AddAsync(int userId, int eventId, CancellationToken cancellationToken = default)
     {
         if (!_favorites.Any(f => f.UserId == userId && f.EventId == eventId))
