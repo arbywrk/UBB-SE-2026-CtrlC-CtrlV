@@ -140,6 +140,20 @@ public sealed partial class EventCard : UserControl
             card.RefreshComputedProperties();
         }
     }
+    
+    private async void VisualSeatGuide_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        var currentEvent = this.DataContext as MovieApp.Core.Models.Event;
+    
+        int capacity = currentEvent?.MaxCapacity ?? 50;
+
+        var dialog = new SeatGuideDialog(capacity)
+        {
+            XamlRoot = this.XamlRoot 
+        };
+
+        await dialog.ShowAsync();
+    }
 
     private void RefreshComputedProperties()
     {
