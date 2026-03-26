@@ -97,6 +97,9 @@ public sealed class SlotMachineServiceTests
         {
             return Task.FromResult(Rewards.Where(r => r.OwnerUserId == userId).ToList());
         }
+
+        public Task MarkRedeemedAsync(int rewardId, CancellationToken cancellationToken = default)
+            => Task.CompletedTask;
     }
 
     [Fact]
