@@ -73,14 +73,15 @@ public sealed partial class HomePage : Page
             XamlRoot = XamlRoot,
             Title = selectedEvent.Title,
             PrimaryButtonText = "Close",
-            DefaultButton = ContentDialogButton.Primary,
-            Content = BuildEventDialogContent(selectedEvent),
+            DefaultButton = ContentDialogButton.Primary
         };
+        
+        dialog.Content = BuildEventDialogContent(selectedEvent, dialog);
 
         await dialog.ShowAsync();
     }
 
-    private static UIElement BuildEventDialogContent(Event selectedEvent)
+    private static UIElement BuildEventDialogContent(Event selectedEvent, ContentDialog parentDialog)
     {
         var layout = new StackPanel
         {
@@ -117,6 +118,26 @@ public sealed partial class HomePage : Page
         {
             Text = $"Seats: {EventCard.GetCapacityText(selectedEvent)}",
         });
+        
+        var seatGuideButton = new Button { Content = "Seat guide" };
+        seatGuideButton.Click += async (s, args) =>
+        {
+            parentDialog.Hide();
+            
+            try
+            {
+                int capacity = selectedEvent.MaxCapacity > 0 ? selectedEvent.MaxCapacity : 50;
+                var seatDialog = new SeatGuideDialog(capacity)
+                {
+                    XamlRoot = parentDialog.XamlRoot
+                };
+                await seatDialog.ShowAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Eroare la deschiderea Seat Guide: {ex.Message}");
+            }
+        };
 
         layout.Children.Add(new StackPanel
         {
@@ -127,7 +148,7 @@ public sealed partial class HomePage : Page
                 new Button { Content = "Will attend" },
                 new Button { Content = "Buy ticket" },
                 new Button { Content = "Favorite" },
-                new Button { Content = "Seat guide" },
+                seatGuideButton
             },
         });
 
