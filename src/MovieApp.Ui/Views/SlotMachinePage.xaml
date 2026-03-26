@@ -4,7 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:MovieApp.Ui.Converters"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <local:NegativeBooleanConverter x:Key="NegativeBooleanConverter" />
+    </Page.Resources>
 
     <ScrollViewer Padding="20">
         <Grid ColumnSpacing="16">
@@ -14,7 +19,8 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Spacing="16">
-                <Border Style="{StaticResource SurfaceCardStyle}">
+                <!-- Slot Machine Reels Display -->
+                <Border Style="{StaticResource SurfaceCardStyle}" Padding="12">
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -22,27 +28,111 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0" Style="{StaticResource StrongSurfaceCardStyle}" MinHeight="180" />
-                        <Border Grid.Column="1" Style="{StaticResource StrongSurfaceCardStyle}" MinHeight="180" />
-                        <Border Grid.Column="2" Style="{StaticResource StrongSurfaceCardStyle}" MinHeight="180" />
+                        <!-- Genre Reel -->
+                        <Border Grid.Column="0" Style="{StaticResource StrongSurfaceCardStyle}" MinHeight="200" Padding="12">
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
+                                <TextBlock Text="GENRE" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" Opacity="0.7" />
+                                <TextBlock Text="{Binding SelectedGenre.Name}" HorizontalAlignment="Center" FontSize="28" FontWeight="Bold" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Actor Reel -->
+                        <Border Grid.Column="1" Style="{StaticResource StrongSurfaceCardStyle}" MinHeight="200" Padding="12">
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
+                                <TextBlock Text="ACTOR" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" Opacity="0.7" />
+                                <TextBlock Text="{Binding SelectedActor.Name}" HorizontalAlignment="Center" FontSize="28" FontWeight="Bold" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Director Reel -->
+                        <Border Grid.Column="2" Style="{StaticResource StrongSurfaceCardStyle}" MinHeight="200" Padding="12">
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
+                                <TextBlock Text="DIRECTOR" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" Opacity="0.7" />
+                                <TextBlock Text="{Binding SelectedDirector.Name}" HorizontalAlignment="Center" FontSize="28" FontWeight="Bold" />
+                            </StackPanel>
+                        </Border>
                     </Grid>
                 </Border>
 
+                <!-- Matching Events -->
                 <Border Style="{StaticResource SurfaceCardStyle}">
-                    <ListView Height="220" />
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Matching Events" FontSize="16" FontWeight="SemiBold" />
+                        <ListView ItemsSource="{Binding MatchingEvents}" Height="220">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnSpacing="12" Padding="8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Spacing="4">
+                                            <TextBlock Text="{Binding Title}" FontWeight="Bold" />
+                                            <TextBlock Text="{Binding EventDateTime}" FontSize="12" Opacity="0.7" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding TicketPrice}" VerticalAlignment="Center" FontWeight="Bold" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </StackPanel>
+                </Border>
+
+                <!-- Jackpot Notification -->
+                <Border x:Name="JackpotBanner" 
+                        Style="{StaticResource SurfaceCardStyle}"
+                        Background="#FFC107"
+                        Visibility="{Binding JackpotAchieved}"
+                        Padding="16">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="?? JACKPOT! ??" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" />
+                        <TextBlock Text="{Binding JackpotMovie.Title}" FontSize="16" HorizontalAlignment="Center" />
+                        <TextBlock Text="You earned a 10% discount!" HorizontalAlignment="Center" />
+                    </StackPanel>
                 </Border>
             </StackPanel>
 
-            <Border
-                Grid.Column="1"
-                Style="{StaticResource SurfaceCardStyle}">
-                <StackPanel Spacing="10">
-                    <TextBox Header="Available spins" />
-                    <TextBox Header="Bonus spins today" />
-                    <TextBox Header="Open streak" />
-                    <Button Content="Spin" />
+            <!-- Control Panel -->
+            <Border Grid.Column="1" Style="{StaticResource SurfaceCardStyle}" VerticalAlignment="Top">
+                <StackPanel Spacing="16" Padding="4">
+                    <!-- Spin Stats -->
+                    <StackPanel Spacing="12">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Daily Spins" FontSize="12" Opacity="0.7" />
+                            <TextBlock Text="{Binding AvailableSpins}" FontSize="24" FontWeight="Bold" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Bonus Spins" FontSize="12" Opacity="0.7" />
+                            <TextBlock Text="{Binding BonusSpins}" FontSize="24" FontWeight="Bold" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Login Streak" FontSize="12" Opacity="0.7" />
+                            <TextBlock Text="{Binding LoginStreak}" FontSize="24" FontWeight="Bold" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="0,8" />
+
+                    <!-- Status Message -->
+                    <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" FontSize="13" Opacity="0.9" />
+
+                    <!-- Spin Button -->
+                    <Button 
+                        Content="SPIN" 
+                        Command="{Binding SpinCommand}"
+                        IsEnabled="{Binding IsSpinButtonEnabled}"
+                        HorizontalAlignment="Stretch"
+                        Padding="12,16"
+                        FontSize="16"
+                        FontWeight="Bold" />
+
+                    <!-- Loading Indicator -->
+                    <ProgressRing IsActive="{Binding IsSpinning}" Visibility="{Binding IsSpinning}" />
                 </StackPanel>
             </Border>
         </Grid>
     </ScrollViewer>
 </Page>
+
