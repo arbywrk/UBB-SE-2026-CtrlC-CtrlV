@@ -11,7 +11,7 @@ namespace MovieApp.Core.Services;
 public sealed class SlotMachineResultService
 {
     private readonly IUserMovieDiscountRepository _discountRepository;
-    private const int JackpotDiscountPercentage = 10;
+    private const int JackpotDiscountPercentage = 70;
 
     public SlotMachineResultService(IUserMovieDiscountRepository discountRepository)
     {
@@ -43,40 +43,10 @@ public sealed class SlotMachineResultService
             Director = director,
             MatchingEvents = matchingEvents,
             JackpotMovie = jackpotMovie,
-            JackpotDiscountApplied = false,
-            DiscountPercentage = 0
+            JackpotDiscountApplied = jackpotMovie is not null,
+            DiscountPercentage = jackpotMovie is not null ? JackpotDiscountPercentage : 0
         };
-
-        // Flag jackpot events and apply discount if jackpot movie found
-        if (jackpotMovie is not null)
-        {
-            result.JackpotDiscountApplied = true;
-            result.DiscountPercentage = JackpotDiscountPercentage;
-
-            // Mark events containing jackpot movie as jackpot events
-            // and create discount reward for the user
-            await ApplyJackpotDiscountAsync(userId, jackpotMovie);
-        }
 
         return result;
-    }
-
-    /// <summary>
-    /// Applies the jackpot discount by creating a reward record for the user.
-    /// </summary>
-    private async Task ApplyJackpotDiscountAsync(int userId, Movie jackpotMovie)
-    {
-        var reward = new Reward
-        {
-            RewardId = 0,
-            RewardType = "MovieDiscount",
-            RedemptionStatus = false,
-            ApplicabilityScope = "MovieSpecific",
-            DiscountValue = JackpotDiscountPercentage,
-            OwnerUserId = userId,
-            EventId = null
-        };
-
-        await _discountRepository.AddAsync(reward);
     }
 }

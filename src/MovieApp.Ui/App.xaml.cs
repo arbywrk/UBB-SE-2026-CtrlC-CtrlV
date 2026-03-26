@@ -36,6 +36,11 @@ public partial class App : Application
     public static SlotMachineService? SlotMachineService { get; private set; }
     public static SlotMachineResultService? SlotMachineResultService { get; private set; }
     public static ReelAnimationService? ReelAnimationService { get; private set; }
+    public static SlotMachineAnimationService? SlotMachineAnimationService { get; private set; }
+    public static MovieApp.Core.Services.IReferralValidator? ReferralValidator { get; private set; }
+    public static MainWindow? CurrentMainWindow { get; private set; }
+    public static IConfigurationRoot? Configuration { get; private set; }
+    public static IMarathonRepository? MarathonRepository { get; private set; }
 
     public App()
     {
@@ -81,6 +86,16 @@ public partial class App : Application
             _currentUserService = new CurrentUserService(userRepository, bootstrapUserOptions);
             await _currentUserService.InitializeAsync();
 
+            var slotMachineService = new SlotMachineService(
+                slotMachineStateRepository,
+                movieRepository,
+                eventRepository,
+                userMovieDiscountRepository);
+
+            var slotMachineResultService = new SlotMachineResultService(userMovieDiscountRepository);
+            var reelAnimationService = new ReelAnimationService();
+            var slotMachineAnimationService = new SlotMachineAnimationService();
+
             CurrentUserService = _currentUserService;
             EventRepository = eventRepository;
             TriviaRepository = triviaRepository;
@@ -94,6 +109,10 @@ public partial class App : Application
             SlotMachineStateRepository = slotMachineStateRepository;
             UserMovieDiscountRepository = userMovieDiscountRepository;
             ScreeningRepository = screeningRepository;
+            SlotMachineService = slotMachineService;
+            SlotMachineResultService = slotMachineResultService;
+            ReelAnimationService = reelAnimationService;
+            SlotMachineAnimationService = slotMachineAnimationService;
             MarathonRepository = marathonRepository;
 
             string localDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MovieApp");

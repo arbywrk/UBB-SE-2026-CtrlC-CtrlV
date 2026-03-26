@@ -9,6 +9,8 @@
 
     <Page.Resources>
         <local:NegativeBooleanConverter x:Key="NegativeBooleanConverter" />
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <local:BoolToHighlightBrushConverter x:Key="BoolToHighlightBrushConverter" />
     </Page.Resources>
 
     <ScrollViewer Padding="20">
@@ -30,26 +32,44 @@
 
                         <!-- Genre Reel -->
                         <Border Grid.Column="0" Style="{StaticResource StrongSurfaceCardStyle}" MinHeight="200" Padding="12">
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
-                                <TextBlock Text="GENRE" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" Opacity="0.7" />
-                                <TextBlock Text="{Binding SelectedGenre.Name}" HorizontalAlignment="Center" FontSize="28" FontWeight="Bold" />
-                            </StackPanel>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="GENRE" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" Opacity="0.7" Margin="0,0,0,8" />
+                                <TextBlock Grid.Row="1" Text="{Binding SelectedGenre.Name}" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="18" FontWeight="Bold" TextWrapping="Wrap" />
+                                <ProgressRing Grid.Row="2" IsActive="{Binding IsGenreSpinning}" Width="24" Height="24" HorizontalAlignment="Center" Margin="0,8,0,0" />
+                            </Grid>
                         </Border>
 
                         <!-- Actor Reel -->
                         <Border Grid.Column="1" Style="{StaticResource StrongSurfaceCardStyle}" MinHeight="200" Padding="12">
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
-                                <TextBlock Text="ACTOR" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" Opacity="0.7" />
-                                <TextBlock Text="{Binding SelectedActor.Name}" HorizontalAlignment="Center" FontSize="28" FontWeight="Bold" />
-                            </StackPanel>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="ACTOR" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" Opacity="0.7" Margin="0,0,0,8" />
+                                <TextBlock Grid.Row="1" Text="{Binding SelectedActor.Name}" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="18" FontWeight="Bold" TextWrapping="Wrap" />
+                                <ProgressRing Grid.Row="2" IsActive="{Binding IsActorSpinning}" Width="24" Height="24" HorizontalAlignment="Center" Margin="0,8,0,0" />
+                            </Grid>
                         </Border>
 
                         <!-- Director Reel -->
                         <Border Grid.Column="2" Style="{StaticResource StrongSurfaceCardStyle}" MinHeight="200" Padding="12">
-                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
-                                <TextBlock Text="DIRECTOR" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" Opacity="0.7" />
-                                <TextBlock Text="{Binding SelectedDirector.Name}" HorizontalAlignment="Center" FontSize="28" FontWeight="Bold" />
-                            </StackPanel>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="DIRECTOR" HorizontalAlignment="Center" FontSize="14" FontWeight="Bold" Opacity="0.7" Margin="0,0,0,8" />
+                                <TextBlock Grid.Row="1" Text="{Binding SelectedDirector.Name}" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="18" FontWeight="Bold" TextWrapping="Wrap" />
+                                <ProgressRing Grid.Row="2" IsActive="{Binding IsDirectorSpinning}" Width="24" Height="24" HorizontalAlignment="Center" Margin="0,8,0,0" />
+                            </Grid>
                         </Border>
                     </Grid>
                 </Border>
@@ -61,33 +81,30 @@
                         <ListView ItemsSource="{Binding MatchingEvents}" Height="220">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid ColumnSpacing="12" Padding="8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0" Spacing="4">
-                                            <TextBlock Text="{Binding Title}" FontWeight="Bold" />
-                                            <TextBlock Text="{Binding EventDateTime}" FontSize="12" Opacity="0.7" />
-                                        </StackPanel>
-                                        <TextBlock Grid.Column="1" Text="{Binding TicketPrice}" VerticalAlignment="Center" FontWeight="Bold" />
-                                    </Grid>
+                                    <Border Background="{Binding IsJackpotEvent, Converter={StaticResource BoolToHighlightBrushConverter}}"
+                                            CornerRadius="4" Padding="8">
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Spacing="4">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Text="{Binding Event.Title}" FontWeight="Bold" />
+                                                    <TextBlock Text="⭐ JACKPOT" FontWeight="Bold" Foreground="#D4A017"
+                                                               Visibility="{Binding IsJackpotEvent, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Event.EventDateTime}" FontSize="12" Opacity="0.7" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding PriceText}" VerticalAlignment="Center" FontWeight="Bold" />
+                                            <Button Grid.Column="2" Content="View Event" Click="ViewEventButton_Click"
+                                                    VerticalAlignment="Center" Padding="8,4" FontSize="12" />
+                                        </Grid>
+                                    </Border>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-                    </StackPanel>
-                </Border>
-
-                <!-- Jackpot Notification -->
-                <Border x:Name="JackpotBanner" 
-                        Style="{StaticResource SurfaceCardStyle}"
-                        Background="#FFC107"
-                        Visibility="{Binding JackpotAchieved}"
-                        Padding="16">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="?? JACKPOT! ??" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" />
-                        <TextBlock Text="{Binding JackpotMovie.Title}" FontSize="16" HorizontalAlignment="Center" />
-                        <TextBlock Text="You earned a 10% discount!" HorizontalAlignment="Center" />
                     </StackPanel>
                 </Border>
             </StackPanel>

@@ -1,6 +1,7 @@
 using MovieApp.Core.Models;
 using MovieApp.Core.Models.Movie;
 using MovieApp.Core.Services;
+using MovieApp.Ui.Controls;
 using MovieApp.Ui.Services;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
@@ -14,9 +15,8 @@ namespace MovieApp.Ui.ViewModels;
 /// </summary>
 public sealed class SlotMachineViewModel : ViewModelBase
 {
-    private readonly SlotMachineService? _slotMachineService;
-    private readonly SlotMachineResultService? _resultService;
-    private readonly ReelAnimationService? _animationService;
+    private readonly SlotMachineService _slotMachineService;
+    private readonly SlotMachineAnimationService _animationService;
     private readonly int _userId;
 
     private Genre _selectedGenre = new();
@@ -27,6 +27,9 @@ public sealed class SlotMachineViewModel : ViewModelBase
     private int _loginStreak;
     private bool _isSpinning;
     private bool _isSpinButtonEnabled;
+    private bool _isGenreSpinning;
+    private bool _isActorSpinning;
+    private bool _isDirectorSpinning;
     private string _statusMessage = "Ready to spin!";
 
     public Genre SelectedGenre
@@ -91,15 +94,35 @@ public sealed class SlotMachineViewModel : ViewModelBase
         _spinCommand?.NotifyCanExecuteChanged();
     }
 
+    public bool IsGenreSpinning
+    {
+        get => _isGenreSpinning;
+        private set => SetProperty(ref _isGenreSpinning, value);
+    }
+
+    public bool IsActorSpinning
+    {
+        get => _isActorSpinning;
+        private set => SetProperty(ref _isActorSpinning, value);
+    }
+
+    public bool IsDirectorSpinning
+    {
+        get => _isDirectorSpinning;
+        private set => SetProperty(ref _isDirectorSpinning, value);
+    }
+
     public string StatusMessage
     {
         get => _statusMessage;
         private set => SetProperty(ref _statusMessage, value);
     }
 
-    public ObservableCollection<Event> MatchingEvents { get; } = new();
+    public ObservableCollection<MatchingEventItem> MatchingEvents { get; } = new();
     public Movie? JackpotMovie { get; private set; }
     public bool JackpotAchieved { get; private set; }
+
+    public event Action<Movie, int>? JackpotHit;
 
     private AsyncRelayCommand? _spinCommand;
     public ICommand SpinCommand => _spinCommand ??= new AsyncRelayCommand(SpinAsync, CanSpin);
@@ -110,35 +133,13 @@ public sealed class SlotMachineViewModel : ViewModelBase
     public SlotMachineViewModel(
         int userId,
         SlotMachineService slotMachineService,
-        SlotMachineResultService resultService,
-        ReelAnimationService animationService)
+        SlotMachineAnimationService animationService)
     {
         _userId = userId;
         _slotMachineService = slotMachineService;
-        _resultService = resultService;
         _animationService = animationService;
     }
 
-    private SlotMachineViewModel(string unavailableMessage)
-    {
-        _statusMessage = unavailableMessage;
-        _isSpinButtonEnabled = false;
-    }
-
-    /// <summary>
-    /// Creates a non-interactive view model used when the database-backed slot-machine
-    /// services are unavailable but the shell should still remain navigable.
-    /// </summary>
-    /// <param name="unavailableMessage">Short message explaining why the feature is offline.</param>
-    /// <returns>A disabled slot-machine state for the page.</returns>
-    public static SlotMachineViewModel CreateUnavailable(string unavailableMessage)
-    {
-        return new SlotMachineViewModel(unavailableMessage);
-    }
-
-    /// <summary>
-    /// Loads the current user's slot-machine state and the initial reel values.
-    /// </summary>
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -155,7 +156,7 @@ public sealed class SlotMachineViewModel : ViewModelBase
 
     private async Task LoadUserStateAsync(CancellationToken cancellationToken = default)
     {
-        var availableSpins = await _slotMachineService!.GetAvailableSpinsAsync(_userId);
+        var availableSpins = await _slotMachineService.GetAvailableSpinsAsync(_userId);
         AvailableSpins = availableSpins;
 
         // Load initial random values for display
@@ -172,6 +173,9 @@ public sealed class SlotMachineViewModel : ViewModelBase
             return;
 
         IsSpinning = true;
+        IsGenreSpinning = true;
+        IsActorSpinning = true;
+        IsDirectorSpinning = true;
         MatchingEvents.Clear();
         JackpotAchieved = false;
         StatusMessage = "Spinning...";
@@ -179,49 +183,51 @@ public sealed class SlotMachineViewModel : ViewModelBase
         try
         {
             // Perform the spin
-            var result = await _slotMachineService!.SpinAsync(_userId);
+            var result = await _slotMachineService.SpinAsync(_userId);
 
             // Get reel sequences for animation
             var genres = await _slotMachineService.GetGenresAsync();
             var actors = await _slotMachineService.GetActorsAsync();
             var directors = await _slotMachineService.GetDirectorsAsync();
 
-            // Animate the reels
-            await _animationService!.AnimateReelsAsync(
+            // Animate the reels with sequential stops: Genre -> Actor -> Director
+            await _animationService.AnimateSpinAsync(
                 result.Genre,
                 result.Actor,
                 result.Director,
-                genres.ToList(),
-                actors.ToList(),
-                directors.ToList());
+                genres,
+                actors,
+                directors,
+                genre => SelectedGenre = genre,
+                actor => SelectedActor = actor,
+                director => SelectedDirector = director,
+                reelIndex =>
+                {
+                    switch (reelIndex)
+                    {
+                        case 0: IsGenreSpinning = false; break;
+                        case 1: IsActorSpinning = false; break;
+                        case 2: IsDirectorSpinning = false; break;
+                    }
+                });
 
-            // Prepare final result
-            var finalResult = await _resultService!.PrepareSpinResultAsync(
-                _userId,
-                result.Genre,
-                result.Actor,
-                result.Director,
-                result.MatchingEvents,
-                result.JackpotMovie);
+            // Update UI with results (reel values already set by animation callbacks)
+            JackpotMovie = result.JackpotMovie;
+            JackpotAchieved = result.JackpotDiscountApplied;
 
-            // Update UI with results
-            SelectedGenre = finalResult.Genre;
-            SelectedActor = finalResult.Actor;
-            SelectedDirector = finalResult.Director;
-            JackpotMovie = finalResult.JackpotMovie;
-            JackpotAchieved = finalResult.JackpotDiscountApplied;
-
-            // Populate matching events
+            // Populate matching events with jackpot highlighting
             MatchingEvents.Clear();
-            foreach (var evt in finalResult.MatchingEvents)
+            foreach (var evt in result.MatchingEvents)
             {
-                MatchingEvents.Add(evt);
+                var isJackpot = result.JackpotEventIds.Contains(evt.Id);
+                MatchingEvents.Add(new MatchingEventItem(evt, isJackpot));
             }
 
             // Update status
             if (JackpotAchieved)
             {
-                StatusMessage = $"🎉 JACKPOT! {finalResult.DiscountPercentage}% discount earned on {finalResult.JackpotMovie?.Title}!";
+                StatusMessage = $"🎉 JACKPOT! {result.DiscountPercentage}% discount earned on {result.JackpotMovie?.Title}!";
+                JackpotHit?.Invoke(result.JackpotMovie!, result.DiscountPercentage);
             }
             else if (MatchingEvents.Count > 0)
             {
@@ -232,8 +238,8 @@ public sealed class SlotMachineViewModel : ViewModelBase
                 StatusMessage = "No matching events this time. Try again!";
             }
 
-            // Refresh available spins
-            await LoadUserStateAsync();
+            // Refresh available spins (without overwriting reel values)
+            AvailableSpins = await _slotMachineService.GetAvailableSpinsAsync(_userId);
         }
         catch (InvalidOperationException ex)
         {
@@ -248,6 +254,22 @@ public sealed class SlotMachineViewModel : ViewModelBase
             IsSpinning = false;
             ((AsyncRelayCommand)SpinCommand).NotifyCanExecuteChanged();
         }
+    }
+}
+
+/// <summary>
+/// Wraps an Event with a jackpot indicator for display in the matching events list.
+/// </summary>
+public sealed class MatchingEventItem
+{
+    public Event Event { get; }
+    public bool IsJackpotEvent { get; }
+    public string PriceText => EventCard.GetPriceText(Event, System.Globalization.CultureInfo.CurrentCulture);
+
+    public MatchingEventItem(Event evt, bool isJackpotEvent)
+    {
+        Event = evt;
+        IsJackpotEvent = isJackpotEvent;
     }
 }
 

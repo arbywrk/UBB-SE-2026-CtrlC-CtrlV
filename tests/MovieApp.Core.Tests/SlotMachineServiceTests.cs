@@ -58,9 +58,26 @@ public sealed class SlotMachineServiceTests
             return Task.FromResult((IReadOnlyList<Movie>)new List<Movie> { movie });
         }
 
+        public Task<IReadOnlyList<Movie>> FindMoviesByAnyCriteriaAsync(int genreId, int actorId, int directorId, CancellationToken cancellationToken = default)
+        {
+            var movie = new Movie { Id = 10, Title = "Action Hit", Description = "", ReleaseYear = 2020, DurationMinutes = 120 };
+            return Task.FromResult((IReadOnlyList<Movie>)new List<Movie> { movie });
+        }
+
         public Task<IReadOnlyList<int>> FindScreeningEventIdsForMovieAsync(int movieId, CancellationToken cancellationToken = default)
         {
             return Task.FromResult((IReadOnlyList<int>)new List<int> { 100 });
+        }
+
+        public Task<IReadOnlyList<ReelCombination>> GetValidReelCombinationsAsync(CancellationToken cancellationToken = default)
+        {
+            var combo = new ReelCombination
+            {
+                Genre = new Genre { Id = 1, Name = "Action" },
+                Actor = new Actor { Id = 2, Name = "Actor A" },
+                Director = new Director { Id = 3, Name = "Director A" }
+            };
+            return Task.FromResult((IReadOnlyList<ReelCombination>)new List<ReelCombination> { combo });
         }
     }
 

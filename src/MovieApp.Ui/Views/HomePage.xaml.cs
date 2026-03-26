@@ -27,32 +27,31 @@ public sealed partial class HomePage : Page
         NavigationCacheMode = NavigationCacheMode.Required;
         InitializeComponent();
         DataContext = ViewModel;
-        Loaded += HomePage_Loaded;
     }
 
-    /// <summary>
-    /// Initializes the home page once after its visual tree is loaded.
-    /// </summary>
-    private async void HomePage_Loaded(object sender, RoutedEventArgs e)
+    protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
-        if (_initialized)
-        {
-            return;
-        }
+        base.OnNavigatedTo(e);
 
-        _initialized = true;
-
-        if (App.AmbassadorRepository is not null && App.CurrentUserService?.CurrentUser is { } currentUser)
+        if (!_initialized)
         {
-            var existingCode = await App.AmbassadorRepository.GetReferralCodeAsync(currentUser.Id);
-            if (string.IsNullOrEmpty(existingCode))
+            _initialized = true;
+
+            if (App.AmbassadorRepository is not null && App.CurrentUserService?.CurrentUser is { } currentUser)
             {
-                var generator = new MovieApp.Core.Services.ReferralCodeGenerator();
-                var newCode = generator.Generate(currentUser.Username, currentUser.Id);
-                await App.AmbassadorRepository.CreateAmbassadorProfileAsync(currentUser.Id, newCode);
+                var existingCode = await App.AmbassadorRepository.GetReferralCodeAsync(currentUser.Id);
+                if (string.IsNullOrEmpty(existingCode))
+                {
+                    var generator = new MovieApp.Core.Services.ReferralCodeGenerator();
+                    var newCode = generator.Generate(currentUser.Username, currentUser.Id);
+                    await App.AmbassadorRepository.CreateAmbassadorProfileAsync(currentUser.Id, newCode);
+                }
             }
         }
 
+        // Refresh discounts every navigation so badges stay current after
+        // jackpot wins or redeems on other pages.
+        await EventCard.RefreshDiscountsAsync();
         await ViewModel.InitializeAsync();
     }
 
@@ -172,6 +171,23 @@ public sealed partial class HomePage : Page
         {
             Text = $"Price: {EventCard.GetPriceText(selectedEvent, System.Globalization.CultureInfo.CurrentCulture)}",
         });
+
+        // Show discounted price if user has a jackpot discount for this event
+        if (EventCard.DiscountByEventId.TryGetValue(selectedEvent.Id, out var discountPct) && discountPct > 0 && selectedEvent.TicketPrice > 0)
+        {
+            layout.Children.Add(new Border
+            {
+                Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                    Windows.UI.Color.FromArgb(0x33, 0xFF, 0xC1, 0x07)),
+                CornerRadius = new Microsoft.UI.Xaml.CornerRadius(6),
+                Padding = new Microsoft.UI.Xaml.Thickness(12, 8, 12, 8),
+                Child = new TextBlock
+                {
+                    Text = $"🎰 Your price: {EventCard.GetDiscountedPriceText(selectedEvent, System.Globalization.CultureInfo.CurrentCulture, discountPct)}",
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                },
+            });
+        }
 
         layout.Children.Add(new TextBlock
         {

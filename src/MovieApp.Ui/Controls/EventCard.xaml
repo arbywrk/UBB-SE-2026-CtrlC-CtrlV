@@ -50,18 +50,34 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <Border
-                            HorizontalAlignment="Left"
-                            Padding="10,4"
-                            Background="{ThemeResource ControlFillColorSecondaryBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
-                            CornerRadius="6">
-                            <TextBlock
-                                FontSize="12"
-                                FontWeight="SemiBold"
-                                Text="{x:Bind EventTypeText, Mode=OneWay}" />
-                        </Border>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6">
+                            <Border
+                                HorizontalAlignment="Left"
+                                Padding="10,4"
+                                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    Text="{x:Bind EventTypeText, Mode=OneWay}" />
+                            </Border>
+
+                            <Border
+                                Padding="10,4"
+                                Background="#33FFD700"
+                                BorderBrush="#FFD4A017"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Visibility="{x:Bind DiscountBadgeVisibility, Mode=OneWay}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    Foreground="#FFD4A017"
+                                    Text="{x:Bind DiscountBadgeText, Mode=OneWay}" />
+                            </Border>
+                        </StackPanel>
 
                         <TextBlock
                             Grid.Row="2"
