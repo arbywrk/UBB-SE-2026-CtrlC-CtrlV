@@ -1,7 +1,6 @@
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
 using MovieApp.Core.Models;
@@ -9,7 +8,6 @@ using MovieApp.Core.Models.Movie;
 using MovieApp.Ui.Controls;
 using MovieApp.Ui.ViewModels;
 using System.Globalization;
-using Windows.System;
 using Windows.UI;
 
 namespace MovieApp.Ui.Views;
@@ -28,7 +26,6 @@ public sealed partial class SlotMachinePage : Page
     {
         InitializeComponent();
         Loaded += OnPageLoaded;
-        AddHandler(KeyDownEvent, new KeyEventHandler(OnKeyDown), handledEventsToo: true);
     }
 
     private async void OnPageLoaded(object sender, RoutedEventArgs e)
@@ -48,20 +45,6 @@ public sealed partial class SlotMachinePage : Page
         DataContext = viewModel;
         await viewModel.InitializeAsync();
         this.Focus(FocusState.Programmatic);
-    }
-
-    private void OnKeyDown(object sender, KeyRoutedEventArgs e)
-    {
-        if (e.Key == VirtualKey.Space)
-        {
-            if (DataContext is SlotMachineViewModel vm && vm.SpinCommand.CanExecute(null))
-            {
-                vm.SpinCommand.Execute(null);
-            }
-
-            e.Handled = true;
-            this.Focus(FocusState.Programmatic);
-        }
     }
 
     private async void OnJackpotHit(Movie movie, int discountPercentage)
