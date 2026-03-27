@@ -40,7 +40,7 @@ public sealed partial class MarathonsPage : Page
         if (sender is not FrameworkElement fe) return;
         if (fe.Tag is not Marathon marathon) return;
 
-        await ViewModel.SelectMarathonAsync(marathon, _currentUserId);
+        await ViewModel.SelectMarathonAsync(marathon);
 
         DetailTitle.Text = marathon.Title;
         DetailTheme.Text = marathon.Theme ?? string.Empty;
@@ -157,7 +157,7 @@ public sealed partial class MarathonsPage : Page
         var service = new MarathonService(repo, App.CurrentUserService!);
 
         await service.LogMovieAsync(marathonId, movieId, correctCount);
-        await ViewModel.RefreshAfterMovieLoggedAsync(marathonId);
+        await ViewModel.RefreshAfterMovieLoggedAsync();
 
         LeaderboardSubtitle.Text = $"{ViewModel.Leaderboard.Count} participants";
         RefreshProgressBar();

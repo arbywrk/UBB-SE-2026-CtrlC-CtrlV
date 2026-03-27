@@ -241,5 +241,10 @@ public sealed class SectionEventsViewModelTests
         {
             return Task.CompletedTask;
         }
+
+        public Task<bool> DeleteAsync(int eventId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(true);
+        }
     }
 }

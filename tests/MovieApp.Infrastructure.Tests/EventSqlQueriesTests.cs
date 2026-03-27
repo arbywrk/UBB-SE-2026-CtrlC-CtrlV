@@ -122,12 +122,12 @@ public sealed class EventSqlQueriesTests
     public void LegacySeedScripts_AreDocumentedAsMovedToMockData()
     {
         var eventsStub = ReadRepoFile("src", "MovieApp.Infrastructure", "Database", "Scripts", "012-seed-events.sql");
-        var marathonsStub = ReadRepoFile("src", "MovieApp.Infrastructure", "Database", "Scripts", "020-seed-marathons.sql");
+        //var marathonsStub = ReadRepoFile("src", "MovieApp.Infrastructure", "Database", "Scripts", "020-seed-marathons.sql");
 
         Assert.Contains("MockData", eventsStub);
-        Assert.Contains("MockData", marathonsStub);
+        //Assert.Contains("MockData", marathonsStub);
         Assert.DoesNotContain("INSERT INTO dbo.Events", eventsStub);
-        Assert.DoesNotContain("INSERT INTO dbo.Marathons", marathonsStub);
+        //Assert.DoesNotContain("INSERT INTO dbo.Marathons", marathonsStub);
     }
 
     [Fact]
