@@ -14,7 +14,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <controls:TabView>
+            <controls:TabView x:Name="RewardsTabView" SelectionChanged="RewardsTabView_SelectionChanged">
                 <controls:TabViewItem Header="Checkout">
                     <StackPanel Padding="0,16,0,0">
                         <ListView Height="420" />
@@ -29,7 +29,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                                 <FontIcon Glyph="&#xE8D1;" FontSize="28" Foreground="{ThemeResource SystemAccentColor}" />
                                 <TextBlock
-                                    Text="{x:Bind RewardBalance, Mode=OneWay}"
+                                    Text="{x:Bind RewardBalance, Mode=OneTime}"
                                     FontSize="32"
                                     FontWeight="Bold"
                                     VerticalAlignment="Center" />
@@ -97,9 +97,9 @@
                                     Style="{StaticResource SectionCaptionTextStyle}" />
 
                                 <Button
-                                    x:Name="RedeemButton"
+                                    x:Name="TriviaRedeemButton"
                                     Content="Redeem at checkout"
-                                    Click="RedeemButton_Click" />
+                                    Click="TriviaRedeemButton_Click" />
                             </StackPanel>
                         </Border>
 
@@ -123,10 +123,34 @@
 
                     </StackPanel>
                 </controls:TabViewItem>
-
-                <controls:TabViewItem Header="Slots">
-                    <StackPanel Padding="0,16,0,0">
-                        <ListView Height="420" />
+                <controls:TabViewItem x:Name="SlotsTab" Header="Slots">
+                    <StackPanel Padding="16" Spacing="12">
+                        <TextBlock Text="Slot Machine Discounts" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <TextBlock Text="Earned from jackpot wins" Style="{StaticResource SectionCaptionTextStyle}" />
+                        <ListView x:Name="SlotsListView" Height="340" SelectionChanged="SlotsListView_SelectionChanged">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="6" Padding="12,8" Margin="0,2"
+                                            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Spacing="2">
+                                                <TextBlock FontWeight="Bold" Text="{Binding MovieTitle}" />
+                                                <TextBlock FontSize="12" Opacity="0.7" Text="🎰 Jackpot Discount" />
+                                            </StackPanel>
+                                            <Border Grid.Column="1" CornerRadius="4" Padding="8,4"
+                                                    VerticalAlignment="Center"
+                                                    Background="{Binding StatusBrush}">
+                                                <TextBlock Text="{Binding StatusLabel}" FontWeight="SemiBold" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
                     </StackPanel>
                 </controls:TabViewItem>
             </controls:TabView>
@@ -135,10 +159,12 @@
                 Grid.Column="1"
                 Style="{StaticResource SurfaceCardStyle}">
                 <StackPanel Spacing="10">
-                    <TextBox Header="Type" />
-                    <TextBox Header="Scope" />
-                    <TextBox Header="Redeemed" />
-                    <Button Content="Mark redeemed" />
+                    <TextBlock Text="Reward Details" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBox x:Name="DetailTypeBox" Header="Type" IsReadOnly="True" />
+                    <TextBox x:Name="DetailScopeBox" Header="Movie" IsReadOnly="True" />
+                    <TextBox x:Name="DetailDiscountBox" Header="Discount" IsReadOnly="True" />
+                    <TextBox x:Name="DetailStatusBox" Header="Status" IsReadOnly="True" />
+                    <Button x:Name="RedeemButton" Content="Mark redeemed" Click="RedeemButton_Click" IsEnabled="False" />
                 </StackPanel>
             </Border>
         </Grid>

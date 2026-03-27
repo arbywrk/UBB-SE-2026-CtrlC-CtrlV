@@ -33,9 +33,12 @@ public partial class App : Application
     public static IUserSlotMachineStateRepository? SlotMachineStateRepository { get; private set; }
     public static IUserMovieDiscountRepository? UserMovieDiscountRepository { get; private set; }
     public static IScreeningRepository? ScreeningRepository { get; private set; }
+    public static IUserEventAttendanceRepository? UserEventAttendanceRepository { get; private set; }
     public static SlotMachineService? SlotMachineService { get; private set; }
     public static SlotMachineResultService? SlotMachineResultService { get; private set; }
     public static ReelAnimationService? ReelAnimationService { get; private set; }
+    public static SlotMachineAnimationService? SlotMachineAnimationService { get; private set; }
+    public static bool StreakSpinGrantedOnLogin { get; private set; }
 
     public App()
     {
@@ -76,10 +79,21 @@ public partial class App : Application
             var slotMachineStateRepository = new SqlUserSlotMachineStateRepository(databaseOptions);
             var userMovieDiscountRepository = new SqlUserRewardRepository(databaseOptions);
             var screeningRepository = new SqlScreeningRepository(databaseOptions);
+            var userEventAttendanceRepository = new SqlUserEventAttendanceRepository(databaseOptions);
             var marathonRepository = new SqlMarathonRepository(databaseOptions);
 
             _currentUserService = new CurrentUserService(userRepository, bootstrapUserOptions);
             await _currentUserService.InitializeAsync();
+
+            var slotMachineService = new SlotMachineService(
+                slotMachineStateRepository,
+                movieRepository,
+                eventRepository,
+                userMovieDiscountRepository);
+
+            var slotMachineResultService = new SlotMachineResultService(userMovieDiscountRepository);
+            var reelAnimationService = new ReelAnimationService();
+            var slotMachineAnimationService = new SlotMachineAnimationService();
 
             CurrentUserService = _currentUserService;
             EventRepository = eventRepository;
@@ -94,6 +108,11 @@ public partial class App : Application
             SlotMachineStateRepository = slotMachineStateRepository;
             UserMovieDiscountRepository = userMovieDiscountRepository;
             ScreeningRepository = screeningRepository;
+            UserEventAttendanceRepository = userEventAttendanceRepository;
+            SlotMachineService = slotMachineService;
+            SlotMachineResultService = slotMachineResultService;
+            ReelAnimationService = reelAnimationService;
+            SlotMachineAnimationService = slotMachineAnimationService;
             MarathonRepository = marathonRepository;
 
             string localDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MovieApp");
@@ -107,6 +126,10 @@ public partial class App : Application
                 userMovieDiscountRepository);
             SlotMachineResultService = new SlotMachineResultService(userMovieDiscountRepository);
             ReelAnimationService = new ReelAnimationService();
+
+            // SM.32/SM.33: record login, advance streak, and award bonus spin if streak reached 3
+            StreakSpinGrantedOnLogin = await slotMachineService.RecordLoginAndCheckStreakAsync(
+                _currentUserService.CurrentUser.Id);
 
             viewModel = new MainViewModel(_currentUserService.CurrentUser);
         }

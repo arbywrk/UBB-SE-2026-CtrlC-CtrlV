@@ -50,24 +50,40 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <Border
-                            HorizontalAlignment="Left"
-                            Padding="10,4"
-                            Background="{ThemeResource ControlFillColorSecondaryBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1"
-                            CornerRadius="6">
-                            <TextBlock
-                                FontSize="12"
-                                FontWeight="SemiBold"
-                                Text="{x:Bind EventTypeText, Mode=OneWay}" />
-                        </Border>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6">
+                            <Border
+                                HorizontalAlignment="Left"
+                                Padding="10,4"
+                                Background="{ThemeResource ControlFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    Text="{x:Bind EventTypeText, Mode=OneTime}" />
+                            </Border>
+
+                            <Border
+                                Padding="10,4"
+                                Background="#33FFD700"
+                                BorderBrush="#FFD4A017"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Visibility="{x:Bind DiscountBadgeVisibility, Mode=OneTime}">
+                                <TextBlock
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    Foreground="#FFD4A017"
+                                    Text="{x:Bind DiscountBadgeText, Mode=OneTime}" />
+                            </Border>
+                        </StackPanel>
 
                         <TextBlock
                             Grid.Row="2"
                             FontSize="28"
                             FontWeight="SemiBold"
-                            Text="{x:Bind DateBadgeDay, Mode=OneWay}" />
+                            Text="{x:Bind DateBadgeDay, Mode=OneTime}" />
                     </Grid>
                 </Grid>
             </Border>
@@ -79,14 +95,14 @@
                 <StackPanel Spacing="8">
                     <TextBlock
                         Style="{ThemeResource SubtitleTextBlockStyle}"
-                        Text="{x:Bind TitleText, Mode=OneWay}"
+                        Text="{x:Bind TitleText, Mode=OneTime}"
                         TextTrimming="CharacterEllipsis"
                         TextWrapping="WrapWholeWords" />
 
                     <TextBlock
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         MaxLines="2"
-                        Text="{x:Bind DescriptionText, Mode=OneWay}"
+                        Text="{x:Bind DescriptionText, Mode=OneTime}"
                         TextTrimming="CharacterEllipsis"
                         TextWrapping="WrapWholeWords" />
                 </StackPanel>
@@ -102,7 +118,7 @@
                             <FontIcon Glyph="&#xE787;" />
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="{x:Bind ScheduleText, Mode=OneWay}"
+                                Text="{x:Bind ScheduleText, Mode=OneTime}"
                                 TextWrapping="WrapWholeWords" />
                         </StackPanel>
 
@@ -110,7 +126,7 @@
                             <FontIcon Glyph="&#xE707;" />
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="{x:Bind LocationText, Mode=OneWay}"
+                                Text="{x:Bind LocationText, Mode=OneTime}"
                                 TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </StackPanel>
@@ -120,12 +136,12 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
                         Padding="10,6"
-                        Background="{x:Bind StatusBackgroundBrush, Mode=OneWay}"
+                        Background="{x:Bind StatusBackgroundBrush, Mode=OneTime}"
                         CornerRadius="999">
                         <TextBlock
                             FontSize="12"
                             FontWeight="SemiBold"
-                            Text="{x:Bind StatusText, Mode=OneWay}" />
+                            Text="{x:Bind StatusText, Mode=OneTime}" />
                     </Border>
                 </Grid>
 
@@ -143,7 +159,7 @@
                             Text="Price" />
                         <TextBlock
                             FontWeight="SemiBold"
-                            Text="{x:Bind PriceText, Mode=OneWay}" />
+                            Text="{x:Bind PriceText, Mode=OneTime}" />
                     </StackPanel>
 
                     <StackPanel
@@ -155,7 +171,7 @@
                             Text="Rating" />
                         <TextBlock
                             FontWeight="SemiBold"
-                            Text="{x:Bind RatingText, Mode=OneWay}" />
+                            Text="{x:Bind RatingText, Mode=OneTime}" />
                     </StackPanel>
 
                     <StackPanel
@@ -167,7 +183,7 @@
                             Text="Capacity" />
                         <TextBlock
                             FontWeight="SemiBold"
-                            Text="{x:Bind CapacityText, Mode=OneWay}" />
+                            Text="{x:Bind CapacityText, Mode=OneTime}" />
                     </StackPanel>
                 </Grid>
 

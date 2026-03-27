@@ -28,11 +28,12 @@ public sealed class SlotMachineService
     {
         var state = await _stateRepository.GetByUserIdAsync(userId) ?? throw new InvalidOperationException("User state not found");
 
+        // Check if daily spins need to be reset (more than a day has passed)
         var today = DateTime.UtcNow.Date;
         var lastReset = state.LastSlotSpinReset.Date;
         if (lastReset < today)
         {
-            state.ResetDailySpins(5);
+            state.ResetDailySpins(5); // Reset to 5 daily spins
         }
 
         var totalSpins = state.DailySpinsRemaining + state.BonusSpins;
@@ -45,14 +46,31 @@ public sealed class SlotMachineService
         else
             state.BonusSpins--;
 
-        // generate reels
-        var genre = await GetRandomGenreAsync();
-        var actor = await GetRandomActorAsync();
-        var director = await GetRandomDirectorAsync();
+        // Pick each reel independently from screened value pools
+        var validCombinations = await _movieRepository.GetValidReelCombinationsAsync();
+        if (validCombinations.Count == 0)
+            throw new InvalidOperationException("No movies with active screenings available");
 
-        // Match current reel results back to events and jackpot-eligible movies.
+        var distinctGenres = validCombinations.Select(c => c.Genre).DistinctBy(g => g.Id).ToList();
+        var distinctActors = validCombinations.Select(c => c.Actor).DistinctBy(a => a.Id).ToList();
+        var distinctDirectors = validCombinations.Select(c => c.Director).DistinctBy(d => d.Id).ToList();
+
+        var genre = distinctGenres[_random.Next(distinctGenres.Count)];
+        var actor = distinctActors[_random.Next(distinctActors.Count)];
+        var director = distinctDirectors[_random.Next(distinctDirectors.Count)];
+
+        // find matching events (OR logic) and jackpot (AND logic)
         var matchingEvents = await GetMatchingEventsAsync(genre.Id, actor.Id, director.Id);
         var jackpotMovie = await FindJackpotMovieAsync(genre.Id, actor.Id, director.Id);
+
+        // Compute jackpot event IDs for UI highlighting
+        var jackpotEventIds = new HashSet<int>();
+        if (jackpotMovie is not null)
+        {
+            var jpEventIds = await _movieRepository.FindScreeningEventIdsForMovieAsync(jackpotMovie.Id);
+            foreach (var id in jpEventIds)
+                jackpotEventIds.Add(id);
+        }
 
         var result = new SlotMachineResult
         {
@@ -60,7 +78,8 @@ public sealed class SlotMachineService
             Actor = actor,
             Director = director,
             MatchingEvents = matchingEvents.ToList(),
-            JackpotMovie = jackpotMovie is null ? null : jackpotMovie,
+            JackpotEventIds = jackpotEventIds,
+            JackpotMovie = jackpotMovie,
             JackpotDiscountApplied = false,
             DiscountPercentage = 0
         };
@@ -69,7 +88,7 @@ public sealed class SlotMachineService
         {
             await GrantJackpotDiscount(userId, jackpotMovie.Id);
             result.JackpotDiscountApplied = true;
-            result.DiscountPercentage = 10;
+            result.DiscountPercentage = 70;
         }
 
         await _stateRepository.UpdateAsync(state);
@@ -81,16 +100,34 @@ public sealed class SlotMachineService
     {
         var state = await _stateRepository.GetByUserIdAsync(userId) ?? throw new InvalidOperationException("User state not found");
 
-        // Availability reads share the same reset rule as actual spins.
+        // Check if daily spins need to be reset (more than a day has passed)
         var today = DateTime.UtcNow.Date;
         var lastReset = state.LastSlotSpinReset.Date;
         if (lastReset < today)
+        {
+            state.ResetDailySpins(5); // Reset to 5 daily spins
+            await _stateRepository.UpdateAsync(state); // Persist the reset
+        }
+
+        return state.DailySpinsRemaining + state.BonusSpins;
+    }
+
+    /// <summary>
+    /// Returns the full spin state for a user (daily spins, bonus spins, login streak),
+    /// resetting daily spins if the day has rolled over.
+    /// </summary>
+    public async Task<UserSpinData> GetUserSpinStateAsync(int userId)
+    {
+        var state = await _stateRepository.GetByUserIdAsync(userId) ?? throw new InvalidOperationException("User state not found");
+
+        var today = DateTime.UtcNow.Date;
+        if (state.LastSlotSpinReset.Date < today)
         {
             state.ResetDailySpins(5);
             await _stateRepository.UpdateAsync(state);
         }
 
-        return state.DailySpinsRemaining + state.BonusSpins;
+        return state;
     }
 
     public async Task<bool> GrantBonusSpinForEventParticipationAsync(int userId)
@@ -106,6 +143,33 @@ public sealed class SlotMachineService
         return false;
     }
 
+    /// <summary>
+    /// Records the current login against the user's streak counter and, if a
+    /// three-day consecutive streak is reached (SM.32), grants one bonus spin
+    /// and resets the streak counter (SM.33).
+    /// Safe to call once per app session; calling more than once on the same day
+    /// is idempotent because <see cref="UserSpinData.UpdateLoginStreak"/> only
+    /// increments when the last login was on the previous calendar day.
+    /// </summary>
+    /// <returns><c>true</c> if a streak bonus spin was awarded.</returns>
+    public async Task<bool> RecordLoginAndCheckStreakAsync(int userId)
+    {
+        var state = await _stateRepository.GetByUserIdAsync(userId) ?? throw new InvalidOperationException("User state not found");
+
+        state.UpdateLoginStreak();
+
+        bool granted = false;
+        if (state.LoginStreak >= 3)
+        {
+            state.BonusSpins++;
+            state.LoginStreak = 0; // SM.33: reset after awarding
+            granted = true;
+        }
+
+        await _stateRepository.UpdateAsync(state);
+        return granted;
+    }
+
     public async Task<bool> GrantStreakSpinAsync(int userId)
     {
         var state = await _stateRepository.GetByUserIdAsync(userId) ?? throw new InvalidOperationException("User state not found");
@@ -119,7 +183,7 @@ public sealed class SlotMachineService
         return false;
     }
 
-    // Helper methods expose the reference data needed by the UI animation layer.
+    // Helpers: these use the movie and event repositories to select from active movies
     public async Task<Genre> GetRandomGenreAsync(CancellationToken cancellationToken = default)
     {
         var genres = await _movieRepository.GetGenresAsync(cancellationToken);
@@ -155,17 +219,16 @@ public sealed class SlotMachineService
 
     public async Task<IReadOnlyList<Event>> GetMatchingEventsAsync(int genreId, int actorId, int directorId)
     {
-        var movies = await _movieRepository.FindMoviesByCriteriaAsync(genreId, actorId, directorId);
+        var movies = await _movieRepository.FindMoviesByAnyCriteriaAsync(genreId, actorId, directorId);
         var events = new List<Event>();
         foreach (var m in movies)
         {
-            // use screenings table to map movies to events when available
             var eventIds = await _movieRepository.FindScreeningEventIdsForMovieAsync(m.Id);
             var allEvents = await _eventRepository.GetAllAsync();
             events.AddRange(allEvents.Where(e => eventIds.Contains(e.Id) && e.EventDateTime > DateTime.UtcNow));
         }
 
-        return events;
+        return events.DistinctBy(e => e.Id).ToList();
     }
 
     public async Task<Movie?> FindJackpotMovieAsync(int genreId, int actorId, int directorId)
@@ -182,9 +245,9 @@ public sealed class SlotMachineService
             RewardType = "MovieDiscount",
             RedemptionStatus = false,
             ApplicabilityScope = $"Movie:{movieId}",
-            DiscountValue = 10.0,
+            DiscountValue = 70.0,
             OwnerUserId = userId,
-            EventId = null
+            EventId = movieId
         };
 
         await _discountRepository.AddAsync(reward);

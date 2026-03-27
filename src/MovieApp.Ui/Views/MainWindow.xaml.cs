@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using MovieApp.Core.Repositories;
 using MovieApp.Ui.Navigation;
 using MovieApp.Ui.ViewModels;
+using Windows.System;
 
 namespace MovieApp.Ui.Views;
 
@@ -19,13 +21,25 @@ public sealed partial class MainWindow : Window
         ViewModel = viewModel;
         _eventRepository = eventRepository;
         InitializeComponent();
-
-        this.Activated += MainWindow_Activated;
-
+        RootGrid.AddHandler(UIElement.KeyDownEvent, new KeyEventHandler(OnGlobalKeyDown), handledEventsToo: true);
         NavigateToRoute(AppRouteResolver.Home);
     }
 
     public MainViewModel ViewModel { get; }
+
+    private void OnGlobalKeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key != VirtualKey.Space)
+            return;
+
+        if (ContentFrame.Content is SlotMachinePage slotPage &&
+            slotPage.DataContext is SlotMachineViewModel vm &&
+            vm.SpinCommand.CanExecute(null))
+        {
+            vm.SpinCommand.Execute(null);
+            e.Handled = true;
+        }
+    }
 
     private async void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
     {

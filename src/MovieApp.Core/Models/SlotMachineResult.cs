@@ -30,6 +30,11 @@ public sealed class SlotMachineResult
     public List<Event> MatchingEvents { get; set; } = new List<Event>();
 
     /// <summary>
+    /// IDs of events that contain the jackpot movie (for UI highlighting).
+    /// </summary>
+    public HashSet<int> JackpotEventIds { get; set; } = new HashSet<int>();
+
+    /// <summary>
     /// Movie triggering jackpot (nullable).
     /// </summary>
     public MovieModel? JackpotMovie { get; set; }
