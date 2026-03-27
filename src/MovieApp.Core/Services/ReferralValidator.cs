@@ -35,4 +35,25 @@ public sealed class ReferralValidator : IReferralValidator
 
         return true;
     }
+
+    /// <summary>
+    /// Checks code validity AND that this friend has not already used the same code for the same event.
+    /// Prevents a referred user from earning the ambassador multiple rewards for a single event.
+    /// </summary>
+    public async Task<bool> IsValidReferralForEventAsync(string referralCode, int currentUserId, int eventId, CancellationToken cancellationToken = default)
+    {
+        if (!await IsValidReferralAsync(referralCode, currentUserId, cancellationToken))
+        {
+            return false;
+        }
+
+        var ambassadorId = await _ambassadorRepository.GetUserIdByReferralCodeAsync(referralCode, cancellationToken);
+        if (ambassadorId is null)
+        {
+            return false;
+        }
+
+        var alreadyUsed = await _ambassadorRepository.HasReferralLogAsync(ambassadorId.Value, currentUserId, eventId, cancellationToken);
+        return !alreadyUsed;
+    }
 }

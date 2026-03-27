@@ -95,6 +95,50 @@ public sealed class ReferralServicesTests
         Assert.Empty(repository.TryApplyRewardCalls);
     }
 
+    // ── Event-scope referral tests ─────────────────────────────────────────────
+
+    [Fact]
+    public async Task IsValidReferralForEventAsync_ReturnsFalse_WhenAlreadyUsedForSameEvent()
+    {
+        var repository = new StubAmbassadorRepository
+        {
+            OwnersByCode = { ["FRIENDCODE"] = 42 },
+            ExistingLogs = { (42, 10, 88) },
+        };
+        var validator = new ReferralValidator(repository);
+
+        var result = await validator.IsValidReferralForEventAsync("FRIENDCODE", currentUserId: 10, eventId: 88);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task IsValidReferralForEventAsync_ReturnsTrue_WhenDifferentEvent()
+    {
+        var repository = new StubAmbassadorRepository
+        {
+            OwnersByCode = { ["FRIENDCODE"] = 42 },
+            ExistingLogs = { (42, 10, 88) }, // used for event 88
+        };
+        var validator = new ReferralValidator(repository);
+
+        // event 99 has never been used → should be valid
+        var result = await validator.IsValidReferralForEventAsync("FRIENDCODE", currentUserId: 10, eventId: 99);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task IsValidReferralForEventAsync_ReturnsFalse_WhenCodeDoesNotExist()
+    {
+        var repository = new StubAmbassadorRepository();
+        var validator = new ReferralValidator(repository);
+
+        var result = await validator.IsValidReferralForEventAsync("MISSING", currentUserId: 10, eventId: 88);
+
+        Assert.False(result);
+    }
+
     private sealed class StubAmbassadorRepository : IAmbassadorRepository
     {
         public Dictionary<string, int> OwnersByCode { get; } = new(StringComparer.OrdinalIgnoreCase);
@@ -102,6 +146,9 @@ public sealed class ReferralServicesTests
         public List<(int AmbassadorId, int FriendId, int EventId)> LogEntries { get; } = [];
 
         public List<int> TryApplyRewardCalls { get; } = [];
+
+        /// <summary>Pre-seeded log entries for HasReferralLogAsync checks.</summary>
+        public HashSet<(int AmbassadorId, int FriendId, int EventId)> ExistingLogs { get; } = [];
 
         public Task<bool> IsReferralCodeValidAsync(string referralCode, CancellationToken cancellationToken = default)
         {
@@ -150,6 +197,11 @@ public sealed class ReferralServicesTests
         public Task DecrementRewardBalanceAsync(int userId, CancellationToken cancellationToken = default)
         {
             return Task.CompletedTask;
+        }
+
+        public Task<bool> HasReferralLogAsync(int ambassadorId, int friendId, int eventId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(ExistingLogs.Contains((ambassadorId, friendId, eventId)));
         }
     }
 }

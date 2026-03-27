@@ -74,4 +74,23 @@ public sealed class SqlUserRewardRepository : IUserMovieDiscountRepository
 
         return rewards;
     }
+
+    /// <summary>
+    /// Marks the specified reward as redeemed in the database.
+    /// </summary>
+    public async Task MarkRedeemedAsync(int rewardId, CancellationToken cancellationToken = default)
+    {
+        const string sql = @"
+            UPDATE dbo.UserMovieDiscounts
+            SET IsRedeemed = 1
+            WHERE Id = @rewardId";
+
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@rewardId", rewardId);
+
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
 }

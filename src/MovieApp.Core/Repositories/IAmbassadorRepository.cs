@@ -41,4 +41,10 @@ public interface IAmbassadorRepository
     /// Consumes one referral reward from the specified user.
     /// </summary>
     Task DecrementRewardBalanceAsync(int userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns true when a referral log entry already exists for the given ambassador, friend, and event triple.
+    /// Used to prevent the same referral being counted twice for the same event.
+    /// </summary>
+    Task<bool> HasReferralLogAsync(int ambassadorId, int friendId, int eventId, CancellationToken cancellationToken = default);
 }

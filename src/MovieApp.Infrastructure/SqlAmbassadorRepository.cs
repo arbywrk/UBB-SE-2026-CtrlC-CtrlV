@@ -129,4 +129,27 @@ public sealed class SqlAmbassadorRepository : IAmbassadorRepository
 
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
+
+    public async Task<bool> HasReferralLogAsync(int ambassadorId, int friendId, int eventId, CancellationToken cancellationToken = default)
+    {
+        const string sql = """
+            SELECT CAST(CASE WHEN EXISTS (
+                SELECT 1 FROM dbo.ReferralLog
+                WHERE AmbassadorID = @ambassadorId
+                  AND FriendID     = @friendId
+                  AND EventID      = @eventId
+            ) THEN 1 ELSE 0 END AS BIT);
+            """;
+
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        await using var command = new SqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@ambassadorId", ambassadorId);
+        command.Parameters.AddWithValue("@friendId", friendId);
+        command.Parameters.AddWithValue("@eventId", eventId);
+
+        var result = await command.ExecuteScalarAsync(cancellationToken);
+        return (bool)(result ?? false);
+    }
 }
