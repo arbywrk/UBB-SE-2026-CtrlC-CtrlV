@@ -1,4 +1,5 @@
-﻿using MovieApp.Core.Models;
+﻿using Microsoft.UI.Xaml;
+using MovieApp.Core.Models;
 using MovieApp.Core.Repositories;
 using MovieApp.Core.Services;
 using System.Collections.ObjectModel;
@@ -7,9 +8,10 @@ namespace MovieApp.Ui.ViewModels;
 
 public sealed class MarathonPageViewModel : ViewModelBase
 {
-    private readonly IMarathonService _marathonService;
-    private readonly IMarathonRepository _marathonRepository;
+    private readonly IMarathonService? _marathonService;
+    private readonly IMarathonRepository? _marathonRepository;
 
+    private int _userId;
     private Marathon? _selectedMarathon;
     private IReadOnlyList<LeaderboardEntry> _leaderboard = [];
     private MarathonProgress? _currentProgress;
@@ -17,6 +19,11 @@ public sealed class MarathonPageViewModel : ViewModelBase
     private bool _isJoined;
     private bool _isLoading;
     private bool _hasSelection;
+    private bool _isDataAvailable;
+
+    public MarathonPageViewModel()
+    {
+    }
 
     public MarathonPageViewModel(
         IMarathonService marathonService,
@@ -28,6 +35,20 @@ public sealed class MarathonPageViewModel : ViewModelBase
 
     // The display items for the top card row
     public ObservableCollection<MarathonDisplayItem> MarathonDisplayItems { get; } = new();
+
+    public ObservableCollection<Marathon> Marathons { get; } = new();
+
+    public bool IsDataAvailable
+    {
+        get => _isDataAvailable;
+        private set
+        {
+            SetProperty(ref _isDataAvailable, value);
+            OnPropertyChanged(nameof(StatusVisibility));
+        }
+    }
+
+    public Visibility StatusVisibility => IsDataAvailable ? Visibility.Collapsed : Visibility.Visible;
 
     public Marathon? SelectedMarathon
     {
@@ -93,13 +114,25 @@ public sealed class MarathonPageViewModel : ViewModelBase
 
     public async Task LoadAsync(int userId)
     {
+        _userId = userId;
+
+        if (_marathonService is null || _marathonRepository is null)
+        {
+            IsDataAvailable = false;
+            return;
+        }
+
+        IsDataAvailable = true;
         var marathons = await _marathonService.GetWeeklyMarathonsAsync(userId);
 
+        Marathons.Clear();
         MarathonDisplayItems.Clear();
         var weekEnd = GetSundayEnd();
 
         foreach (var marathon in marathons)
         {
+            Marathons.Add(marathon);
+
             var participantCount = await _marathonRepository
                 .GetParticipantCountAsync(marathon.Id);
 
@@ -122,7 +155,7 @@ public sealed class MarathonPageViewModel : ViewModelBase
         }
     }
 
-    public async Task SelectMarathonAsync(Marathon marathon, int userId)
+    public async Task SelectMarathonAsync(Marathon marathon)
     {
         SelectedMarathon = marathon;
         HasSelection = true;
@@ -130,7 +163,7 @@ public sealed class MarathonPageViewModel : ViewModelBase
 
         try
         {
-            CurrentProgress = await _marathonService
+            CurrentProgress = await _marathonService!
                 .GetCurrentProgressAsync(marathon.Id);
 
             IsJoined = CurrentProgress is not null;
@@ -138,12 +171,12 @@ public sealed class MarathonPageViewModel : ViewModelBase
             IsLocked = false;
             if (marathon.PrerequisiteMarathonId is int prereqId)
             {
-                var prereqDone = await _marathonRepository
-                    .IsPrerequisiteCompletedAsync(userId, prereqId);
+                var prereqDone = await _marathonRepository!
+                    .IsPrerequisiteCompletedAsync(_userId, prereqId);
                 IsLocked = !prereqDone;
             }
 
-            var leaderboard = await _marathonRepository
+            var leaderboard = await _marathonRepository!
                 .GetLeaderboardWithUsernamesAsync(marathon.Id);
             Leaderboard = leaderboard.ToList();
 
@@ -158,21 +191,23 @@ public sealed class MarathonPageViewModel : ViewModelBase
 
     public async Task<bool> JoinMarathonAsync(int marathonId)
     {
-        var success = await _marathonService.StartMarathonAsync(marathonId);
+        var success = await _marathonService!.StartMarathonAsync(marathonId);
         if (!success) return false;
 
-        CurrentProgress = await _marathonService.GetCurrentProgressAsync(marathonId);
+        CurrentProgress = await _marathonService!.GetCurrentProgressAsync(marathonId);
         IsJoined = true;
         await LoadMoviesAsync(marathonId);
         return true;
     }
 
-    public async Task RefreshAfterMovieLoggedAsync(int marathonId)
+    public async Task RefreshAfterMovieLoggedAsync()
     {
-        CurrentProgress = await _marathonService
+        var marathonId = SelectedMarathon!.Id;
+
+        CurrentProgress = await _marathonService!
             .GetCurrentProgressAsync(marathonId);
 
-        var leaderboard = await _marathonRepository
+        var leaderboard = await _marathonRepository!
             .GetLeaderboardWithUsernamesAsync(marathonId);
         Leaderboard = leaderboard.ToList();
 
@@ -181,7 +216,7 @@ public sealed class MarathonPageViewModel : ViewModelBase
 
     private async Task LoadMoviesAsync(int marathonId)
     {
-        var movies = await _marathonRepository
+        var movies = await _marathonRepository!
             .GetMoviesForMarathonAsync(marathonId);
 
         var verifiedCount = CurrentProgress?.CompletedMoviesCount ?? 0;

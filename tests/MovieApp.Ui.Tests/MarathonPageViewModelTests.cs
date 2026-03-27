@@ -207,5 +207,42 @@ public sealed class MarathonPageViewModelTests
         {
             return Task.CompletedTask;
         }
+
+        public Task<IEnumerable<MovieApp.Core.Models.Movie.Movie>> GetMoviesForMarathonAsync(int marathonId)
+        {
+            return Task.FromResult<IEnumerable<MovieApp.Core.Models.Movie.Movie>>([]);
+        }
+
+        public Task<IEnumerable<LeaderboardEntry>> GetLeaderboardWithUsernamesAsync(int marathonId)
+        {
+            IEnumerable<MarathonProgress> source;
+
+            if (LeaderboardSequence.Count > 0)
+            {
+                source = LeaderboardSequence.Dequeue();
+            }
+            else if (LeaderboardByMarathonId.TryGetValue(marathonId, out var entries))
+            {
+                source = entries;
+            }
+            else
+            {
+                return Task.FromResult<IEnumerable<LeaderboardEntry>>([]);
+            }
+
+            return Task.FromResult<IEnumerable<LeaderboardEntry>>(source.Select(p => new LeaderboardEntry
+            {
+                UserId = p.UserId,
+                Username = $"User{p.UserId}",
+                CompletedMoviesCount = p.CompletedMoviesCount,
+                TriviaAccuracy = p.TriviaAccuracy,
+                FinishedAt = p.FinishedAt,
+            }).ToList());
+        }
+
+        public Task<int> GetParticipantCountAsync(int marathonId)
+        {
+            return Task.FromResult(0);
+        }
     }
 }
